@@ -1,97 +1,194 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# TMDB Movies App - React Native CLI & TypeScript
 
-# Getting Started
+Aplicación móvil de alto rendimiento desarrollada en **React Native CLI** y **TypeScript** que consume la API de **The Movie Database (TMDB)**. La arquitectura fue diseñada siguiendo patrones modulares de escala empresarial (*Feature-Driven Architecture* y *Shared Core*), con gestión de estado mediante **Redux Toolkit & RTK Query**, navegación fluida con **React Navigation** y manejo exhaustivo de estados de interfaz (carga, error y lista vacía).
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+---
 
-## Step 1: Start Metro
+## 📱 Capturas y Funcionalidades
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+- **Listado de Películas:** Muestra películas populares con imágenes de póster optimizadas, títulos y calificaciones promedio (rating).
+- **Paginación Infinita:** Scroll infinito fluido con deduplicación y carga automática de páginas adicionales.
+- **Pull-to-Refresh:** Actualización rápida de la lista arrastrando hacia abajo.
+- **Barra de Búsqueda:** Búsqueda en tiempo real por nombre con optimización de *debounce* (400ms) y botón de limpieza inmediata.
+- **Pantalla de Detalle en Alta Resolución:** Visualización de póster y *backdrop* en resolución máxima (`original` / `w500`), título, fecha de estreno formateada, duración, calificación detallada, géneros organizados en badges y sinopsis completa.
+- **Estados de UI Visibles:**
+  - **Carga:** Skeletons placeholders durante la carga inicial y spinners discretos para paginación y obtención de detalles.
+  - **Error:** Vista de error con mensaje amigable y botón de **Reintentar** (*Retry*).
+  - **Lista Vacía:** Retroalimentación cuando la búsqueda no arroja resultados o la lista está vacía, con botón para resetear la consulta.
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+---
 
-```sh
-# Using npm
-npm start
+## 🛠️ Stack Tecnológico
 
-# OR using Yarn
-yarn start
+| Herramienta | Versión / Detalle | Justificación |
+| :--- | :--- | :--- |
+| **React Native CLI** | 0.87.1 | Requisito del desafío; brinda control directo del entorno nativo y máximo rendimiento. |
+| **TypeScript** | Modo Estrito (`strict: true`) | Tipado estricto sin `any`, interfaces completas para DTOs y parámetros de navegación. |
+| **Redux Toolkit & RTK Query** | ^2.6.0 / ^2.6.0 | Gestión de estado global y datos de red con caché automatizado, deduplicación de peticiones y control nativo de estados (`isLoading`, `isFetching`, `isError`). |
+| **React Navigation** | Native Stack 7.x | Navegación nativa fluida con tipado estricto (`RootStackParamList`). |
+| **React Native Safe Area Context** | ^5.5.2 | Soporte perfecto para notch, Dynamic Island y barras de navegación del sistema. |
+| **Jest & React Test Renderer** | 29.x | Suite de pruebas unitarias para utilitarios, formateadores y componentes de feedback. |
+
+---
+
+## 🏗️ Arquitectura del Proyecto (Diseñada para Escalar)
+
+Para garantizar que la aplicación pueda escalar a decenas de pantallas, múltiples dominios y varios equipos de desarrollo sin acoplamiento, se implementó una **Arquitectura Modular Basada en Features** (*Feature-Driven Architecture*) con un núcleo transversal compartido (*Shared Core*):
+
+```text
+src/
+├── app/                              # Configuración central y bootstrap
+│   ├── config/                       # Variables de entorno y endpoints (env.ts)
+│   ├── providers/                    # AppProviders (Redux, SafeArea, Navigation)
+│   └── store/                        # Redux Store, rootReducer y hooks tipados
+│
+├── navigation/                       # Roteo global
+│   ├── RootNavigator.tsx             # Native Stack Navigator
+│   ├── routes.ts                     # Constantes de nombres de rutas
+│   └── types.ts                      # Tipos de parámetros y props de pantalla
+│
+├── features/                         # Fórmulas de Dominio (Vertical Slices)
+│   ├── movies/                       # Módulo de Películas
+│   │   ├── api/                      # RTK Query slice (moviesApi.ts, types.ts)
+│   │   ├── components/               # MovieCard, MovieCardSkeleton, RatingBadge
+│   │   ├── screens/                  # MovieListScreen, MovieDetailScreen
+│   │   └── index.ts                  # Public API del módulo de películas
+│   │
+│   └── search/                       # Módulo de Búsqueda (reutilizable)
+│       ├── components/               # SearchBar con botón de limpiar
+│       ├── hooks/                    # useDebounce hook
+│       └── index.ts
+│
+└── shared/                           # Núcleo Compartido Agnóstico de Negocio
+    ├── api/                          # baseQuery autenticado para TMDB
+    ├── components/                   # Design System y Feedback Views
+    │   ├── ui/                       # AppText, Button, Badge
+    │   └── feedback/                 # LoadingView, ErrorView, EmptyStateView
+    ├── theme/                        # Tokens de diseño (colors, typography, spacing)
+    └── utils/                        # Formateadores de fecha, rating e imágenes
 ```
 
-## Step 2: Build and run your app
+### ¿Por qué esta arquitectura?
+1. **Aislamiento de Dominios:** Agregar nuevas secciones (por ejemplo, Series de TV en `features/tv-shows` o Favoritos en `features/favorites`) no altera ni ensucia el código de películas.
+2. **Public APIs (`index.ts`):** Cada módulo expone únicamente los componentes y hooks públicos que el resto de la app necesita consumir.
+3. **Mantenibilidad en Equipo:** Múltiples desarrolladores o squads pueden trabajar en distintas features simultáneamente sin generar conflictos de merge constantes.
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+---
 
-### Android
+## 🚀 Requisitos Previos
 
-```sh
-# Using npm
-npm run android
+Antes de comenzar, asegúrate de contar con el entorno de React Native CLI configurado:
+- **Node.js:** Versión `>= 20.x` (recomendado `>= 22.x`)
+- **Gestor de paquetes:** `npm` o `yarn`
+- **Para iOS:** macOS con Xcode 15+, Ruby (>= 3.1) y CocoaPods instalado (`pod --version`)
+- **Para Android:** Android Studio con Android SDK (API 34/35) y variable `ANDROID_HOME` configurada.
 
-# OR using Yarn
-yarn android
+---
+
+## 📦 Instalación y Ejecución
+
+### 1. Clonar el repositorio
+```bash
+git clone <URL_DEL_REPOSITORIO>
+cd rn-desafio
 ```
 
-### iOS
+### 2. Instalar dependencias
+```bash
+npm install
+```
 
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
+### 3. Configurar variables de entorno
+Crea un archivo `.env` en la raíz copiando el archivo de ejemplo:
+```bash
+cp .env.example .env
+```
+> **Nota:** La aplicación ya incluye una clave de demostración funcional preconfigurada en `src/app/config/env.ts` para permitir una evaluación inmediata sin bloqueos. Si deseas utilizar tu propia API Key de TMDB, puedes colocarla en el archivo `.env`:
+> ```env
+> TMDB_API_KEY=tu_api_key_aqui
+> ```
 
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
+---
 
-```sh
+### 4. Compilación y Ejecución en iOS
+
+1. Instalar las dependencias de CocoaPods:
+```bash
 bundle install
+bundle exec pod install --project-directory=ios
 ```
 
-Then, and every time you update your native dependencies, run:
-
-```sh
-bundle exec pod install
-```
-
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
-
-```sh
-# Using npm
+2. Ejecutar en el simulador de iOS:
+```bash
 npm run ios
+```
+*(Opcional: puedes abrir `ios/TMDBApp.xcworkspace` en Xcode y presionar el botón **Run**).*
 
-# OR using Yarn
-yarn ios
+---
+
+### 5. Compilación y Ejecución en Android
+
+1. Iniciar un emulador de Android o conectar un dispositivo con depuración USB activada.
+2. Ejecutar:
+```bash
+npm run android
 ```
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+---
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+## 🧪 Verificación de Calidad y Pruebas
 
-## Step 3: Modify your app
+El proyecto cuenta con validación estricta de TypeScript y pruebas unitarias con Jest:
 
-Now that you have successfully run the app, let's make changes!
+### Verificación de tipos TypeScript:
+```bash
+npm run typecheck
+```
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+### Ejecución de pruebas unitarias:
+```bash
+npm test
+```
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
+Las pruebas cubren:
+- Montaje del árbol de componentes raíz y proveedores (`App.test.tsx`).
+- Componentes de UI y estados de feedback (`RatingBadge`, `Badge`, `Button`, `ErrorView`, `EmptyStateView`).
+- Utilitarios de formato de fecha en español, cálculo de duración y calificaciones numéricas.
+- Construcción y resolución de URLs de imágenes del TMDB en distintas densidades (`w342`, `w500`, `original`).
 
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
+---
 
-## Congratulations! :tada:
+## 💡 Decisiones Técnicas Destacadas
 
-You've successfully run and modified your React Native App. :partying_face:
+1. **Redux Toolkit + RTK Query:**
+   - Cumple de forma nativa con el requisito de gestión de estado global.
+   - Elimina boilerplate excesivo en comparación con Redux clásico.
+   - Soporte automático para caché de peticiones, evitando solicitudes duplicadas de la misma película al navegar entre pantallas.
+   - Función de fusión (*merge*) para paginación infinita sin mutaciones indebidas ni elementos duplicados.
 
-### Now what?
+2. **Optimización de Rendimiento en Listas:**
+   - Implementación de `FlatList` configurada con `removeClippedSubviews={true}`, `maxToRenderPerBatch={10}` y `windowSize={10}` para garantizar una tasa de refresco constante de 60fps.
+   - Elementos de lista envueltos en `React.memo` para evitar renderizados redundantes al paginar o ingresar texto.
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
+3. **Carga Inteligente de Imágenes:**
+   - Se utiliza resolución `w342` en la cuadrícula de listado para ahorrar ancho de banda y acelerar la carga en redes móviles.
+   - En la pantalla de detalles se cargan imágenes en resolución completa (`original` para fondo y `w500` para póster).
+   - Manejo de fallbacks visuales automáticos en caso de pósters no disponibles o errores de red.
 
-# Troubleshooting
+4. **Búsqueda Eficiente con Debounce:**
+   - Hook reactivo `useDebounce` con retardo de 400ms para evitar saturar el endpoint de búsqueda en cada pulsación de tecla.
 
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
+---
 
-# Learn More
+## 🔮 Qué mejoraría con más tiempo
 
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+1. **Soporte Completo a Series de TV (`features/tv-shows`):**
+   - Incorporar una barra de navegación inferior (Bottom Tabs) para alternar entre "Películas" y "Series", reutilizando los componentes del *Shared Core*.
+2. **Persistencia y Modo Offline:**
+   - Integrar almacenamiento local (como `redux-persist` con `react-native-mmkv`) para permitir explorar películas cacheadas sin conexión a internet.
+3. **Favoritos y Watchlist:**
+   - Implementar un slice de Redux para que los usuarios puedan guardar películas favoritas en su dispositivo.
+4. **Animaciones de Transición Suave:**
+   - Integrar `react-native-reanimated` para transiciones de elementos compartidos (*Shared Element Transitions*) entre el póster de la lista y la pantalla de detalle.
+5. **Pruebas End-to-End (E2E):**
+   - Configurar pruebas E2E con Maestro o Detox para validar automáticamente los flujos de navegación, búsqueda y paginación en emuladores reales.
