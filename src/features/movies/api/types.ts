@@ -1,3 +1,5 @@
+export type MovieCategory = 'popular' | 'top_rated' | 'now_playing' | 'upcoming';
+
 export interface GenreDTO {
   id: number;
   name: string;
@@ -16,6 +18,7 @@ export interface MovieDTO {
   popularity: number;
   genre_ids?: number[];
   adult?: boolean;
+  original_language?: string;
 }
 
 export interface ProductionCompanyDTO {
@@ -44,6 +47,20 @@ export interface MovieDetailsDTO {
   budget?: number;
   revenue?: number;
   homepage?: string | null;
+  original_language?: string;
+}
+
+export interface CastMemberDTO {
+  id: number;
+  name: string;
+  character: string;
+  profile_path: string | null;
+  order: number;
+}
+
+export interface MovieCreditsDTO {
+  id: number;
+  cast: CastMemberDTO[];
 }
 
 export interface PaginatedResponse<T> {

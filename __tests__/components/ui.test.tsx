@@ -5,6 +5,7 @@ import { Badge } from '@shared/components/ui/Badge';
 import { Button } from '@shared/components/ui/Button';
 import { ErrorView } from '@shared/components/feedback/ErrorView';
 import { EmptyStateView } from '@shared/components/feedback/EmptyStateView';
+import { CategoryFilterTabs } from '@features/movies/components/CategoryFilterTabs';
 
 describe('UI & Feedback Components', () => {
   it('renders RatingBadge correctly with formatted score', () => {
@@ -62,6 +63,23 @@ describe('UI & Feedback Components', () => {
           title="Sin películas"
           message="No se encontraron resultados"
           onAction={onAction}
+        />
+      );
+    });
+    expect(renderer).toBeDefined();
+    ReactTestRenderer.act(() => {
+      renderer?.unmount();
+    });
+  });
+
+  it('renders CategoryFilterTabs and responds to tab change', () => {
+    const onSelect = jest.fn();
+    let renderer: ReactTestRenderer.ReactTestRenderer | undefined;
+    ReactTestRenderer.act(() => {
+      renderer = ReactTestRenderer.create(
+        <CategoryFilterTabs
+          selectedCategory="popular"
+          onSelectCategory={onSelect}
         />
       );
     });

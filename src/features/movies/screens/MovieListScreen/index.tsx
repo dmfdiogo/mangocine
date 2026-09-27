@@ -13,13 +13,17 @@ import { AppText } from '@shared/components/ui/Text';
 import { SearchBar, useDebounce } from '@features/search';
 import { MovieCard } from '@features/movies/components/MovieCard';
 import { MovieCardSkeleton } from '@features/movies/components/MovieCardSkeleton';
+import {
+  CategoryFilterTabs,
+  CATEGORIES,
+} from '@features/movies/components/CategoryFilterTabs';
 import { ErrorView } from '@shared/components/feedback/ErrorView';
 import { EmptyStateView } from '@shared/components/feedback/EmptyStateView';
 import {
-  useGetPopularMoviesQuery,
+  useGetMoviesByCategoryQuery,
   useSearchMoviesQuery,
 } from '@features/movies/api/moviesApi';
-import { MovieDTO } from '@features/movies/api/types';
+import { MovieDTO, MovieCategory } from '@features/movies/api/types';
 import { MovieListScreenProps } from '@navigation/types';
 import { ROUTES } from '@navigation/routes';
 import { colors } from '@shared/theme/colors';
@@ -35,17 +39,19 @@ export const MovieListScreen: React.FC<MovieListScreenProps> = ({ navigation }) 
   const [searchInput, setSearchInput] = useState('');
   const debouncedQuery = useDebounce(searchInput.trim(), 400);
 
-  // Pagination states
-  const [popularPage, setPopularPage] = useState(1);
+  // Category and pagination states
+  const [selectedCategory, setSelectedCategory] = useState<MovieCategory>('popular');
+  const [categoryPage, setCategoryPage] = useState(1);
   const [searchPage, setSearchPage] = useState(1);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const isSearchMode = debouncedQuery.length >= 2;
 
-  // Popular movies query
-  const popularQuery = useGetPopularMoviesQuery(popularPage, {
-    skip: isSearchMode,
-  });
+  // Category movies query (popular, top_rated, now_playing, upcoming)
+  const categoryQueryResult = useGetMoviesByCategoryQuery(
+    { category: selectedCategory, page: categoryPage },
+    { skip: isSearchMode }
+  );
 
   // Search movies query
   const searchQueryResult = useSearchMoviesQuery(
@@ -53,7 +59,7 @@ export const MovieListScreen: React.FC<MovieListScreenProps> = ({ navigation }) 
     { skip: !isSearchMode }
   );
 
-  const activeQuery = isSearchMode ? searchQueryResult : popularQuery;
+  const activeQuery = isSearchMode ? searchQueryResult : categoryQueryResult;
   const { data, isLoading, isFetching, isError, refetch } = activeQuery;
 
   // Grid layout calculation
@@ -76,6 +82,12 @@ export const MovieListScreen: React.FC<MovieListScreenProps> = ({ navigation }) 
     [navigation]
   );
 
+  // Category change handler
+  const handleCategoryChange = useCallback((category: MovieCategory) => {
+    setSelectedCategory(category);
+    setCategoryPage(1);
+  }, []);
+
   // Pagination trigger (Infinite Scroll)
   const handleEndReached = useCallback(() => {
     if (isFetching || isLoading) return;
@@ -84,7 +96,7 @@ export const MovieListScreen: React.FC<MovieListScreenProps> = ({ navigation }) 
       if (isSearchMode) {
         setSearchPage((prev) => prev + 1);
       } else {
-        setPopularPage((prev) => prev + 1);
+        setCategoryPage((prev) => prev + 1);
       }
     }
   }, [data, isFetching, isLoading, isSearchMode]);
@@ -95,7 +107,7 @@ export const MovieListScreen: React.FC<MovieListScreenProps> = ({ navigation }) 
     if (isSearchMode) {
       setSearchPage(1);
     } else {
-      setPopularPage(1);
+      setCategoryPage(1);
     }
     try {
       await refetch();
@@ -119,13 +131,18 @@ export const MovieListScreen: React.FC<MovieListScreenProps> = ({ navigation }) 
   // Key extractor
   const keyExtractor = useCallback((item: MovieDTO) => String(item.id), []);
 
-  // List header with branding and search bar
+  const currentCategoryLabel = useMemo(() => {
+    const found = CATEGORIES.find((c) => c.id === selectedCategory);
+    return found ? `${found.icon} ${found.label}` : 'Películas';
+  }, [selectedCategory]);
+
+  // List header with branding, search bar, and category tabs
   const renderListHeader = useMemo(() => {
     return (
       <View style={styles.headerContainer}>
         <View style={styles.titleRow}>
           <AppText variant="hero" color="text">
-            Películas
+            CineExplora
           </AppText>
           <View style={styles.badgeTMDB}>
             <AppText variant="tag" color="primary">
@@ -150,11 +167,19 @@ export const MovieListScreen: React.FC<MovieListScreenProps> = ({ navigation }) 
           style={styles.searchBar}
         />
 
+        {!isSearchMode && (
+          <CategoryFilterTabs
+            selectedCategory={selectedCategory}
+            onSelectCategory={handleCategoryChange}
+            style={styles.categoryTabs}
+          />
+        )}
+
         <View style={styles.sectionHeader}>
           <AppText variant="subtitle" color="text">
             {isSearchMode
               ? `Resultados para "${debouncedQuery}"`
-              : 'Películas Populares'}
+              : currentCategoryLabel}
           </AppText>
           {data && (
             <AppText variant="caption" color="textMuted">
@@ -164,7 +189,15 @@ export const MovieListScreen: React.FC<MovieListScreenProps> = ({ navigation }) 
         </View>
       </View>
     );
-  }, [searchInput, isSearchMode, debouncedQuery, data]);
+  }, [
+    searchInput,
+    isSearchMode,
+    selectedCategory,
+    handleCategoryChange,
+    debouncedQuery,
+    currentCategoryLabel,
+    data,
+  ]);
 
   // List footer loader for infinite scroll
   const renderListFooter = useMemo(() => {
@@ -186,7 +219,7 @@ export const MovieListScreen: React.FC<MovieListScreenProps> = ({ navigation }) 
         <View style={styles.headerContainer}>
           <View style={styles.titleRow}>
             <AppText variant="hero" color="text">
-              Películas
+              CineExplora
             </AppText>
           </View>
           <SearchBar
@@ -294,12 +327,17 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(229, 9, 20, 0.4)',
   },
   searchBar: {
-    marginBottom: spacing.lg,
+    marginBottom: spacing.md,
+  },
+  categoryTabs: {
+    paddingHorizontal: 0,
+    marginBottom: spacing.md,
   },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginTop: spacing.xs,
   },
   listContent: {
     paddingBottom: spacing.xxl,

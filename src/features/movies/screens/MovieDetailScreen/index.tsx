@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   ScrollView,
@@ -6,12 +6,14 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
+  Share,
   useWindowDimensions,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppText } from '@shared/components/ui/Text';
 import { Badge } from '@shared/components/ui/Badge';
 import { RatingBadge } from '@features/movies/components/RatingBadge';
+import { CastList } from '@features/movies/components/CastList';
 import { ErrorView } from '@shared/components/feedback/ErrorView';
 import { useGetMovieDetailsQuery } from '@features/movies/api/moviesApi';
 import { MovieDetailScreenProps } from '@navigation/types';
@@ -62,12 +64,23 @@ export const MovieDetailScreen: React.FC<MovieDetailScreenProps> = ({
     navigation.goBack();
   };
 
+  const handleShare = useCallback(async () => {
+    try {
+      await Share.share({
+        title: movieDetails?.title || title,
+        message: `¡Mira esta película: "${movieDetails?.title || title}"! Más info en TMDB: https://www.themoviedb.org/movie/${movieId}`,
+      });
+    } catch {
+      // User cancelled or dismissed share sheet
+    }
+  }, [movieDetails?.title, title, movieId]);
+
   if (isError && !movieDetails) {
     return (
       <View style={[styles.screen, { paddingTop: insets.top }]}>
-        <View style={styles.floatingHeader}>
+        <View style={styles.floatingHeaderLeft}>
           <TouchableOpacity
-            style={styles.backButton}
+            style={styles.circleButton}
             onPress={handleBack}
             activeOpacity={0.7}
           >
@@ -92,7 +105,7 @@ export const MovieDetailScreen: React.FC<MovieDetailScreenProps> = ({
         contentContainerStyle={styles.scrollContent}
       >
         {/* Backdrop Hero with High-Resolution Image */}
-        <View style={[styles.backdropContainer, { width, height: width * 0.7 }]}>
+        <View style={[styles.backdropContainer, { width, height: width * 0.72 }]}>
           {backdropUri ? (
             <>
               <Image
@@ -149,7 +162,7 @@ export const MovieDetailScreen: React.FC<MovieDetailScreenProps> = ({
               )}
             </View>
 
-            {/* Title, Year, Rating */}
+            {/* Title, Tagline, Year, Rating */}
             <View style={styles.mainInfoText}>
               <AppText variant="title" color="text" style={styles.movieTitle}>
                 {movieDetails?.title || title}
@@ -179,13 +192,24 @@ export const MovieDetailScreen: React.FC<MovieDetailScreenProps> = ({
                 ) : null}
               </View>
 
-              {formattedRuntime && (
-                <View style={styles.runtimeRow}>
-                  <AppText variant="caption" color="textSecondary">
-                    ⏱ {formattedRuntime}
-                  </AppText>
-                </View>
-              )}
+              {/* Specs Pills: HD, Language, Runtime */}
+              <View style={styles.specsRow}>
+                <Badge label="HD" variant="rating" style={styles.specBadge} />
+                {movieDetails?.original_language && (
+                  <Badge
+                    label={movieDetails.original_language.toUpperCase()}
+                    variant="surface"
+                    style={styles.specBadge}
+                  />
+                )}
+                {formattedRuntime && (
+                  <Badge
+                    label={formattedRuntime}
+                    variant="outline"
+                    style={styles.specBadge}
+                  />
+                )}
+              </View>
             </View>
           </View>
 
@@ -243,6 +267,9 @@ export const MovieDetailScreen: React.FC<MovieDetailScreenProps> = ({
             </AppText>
           </View>
 
+          {/* Cast / Reparto */}
+          <CastList movieId={movieId} />
+
           {/* Production Companies */}
           {movieDetails?.production_companies &&
             movieDetails.production_companies.length > 0 && (
@@ -265,15 +292,25 @@ export const MovieDetailScreen: React.FC<MovieDetailScreenProps> = ({
         </View>
       </ScrollView>
 
-      {/* Floating Back Button */}
-      <View style={[styles.floatingHeader, { top: insets.top + spacing.xs }]}>
+      {/* Floating Top Navigation Header */}
+      <View style={[styles.floatingHeaderContainer, { top: insets.top + spacing.xs }]}>
         <TouchableOpacity
-          style={styles.backButton}
+          style={styles.circleButton}
           onPress={handleBack}
           activeOpacity={0.7}
         >
           <AppText variant="subtitle" color="text" style={styles.backIcon}>
             ←
+          </AppText>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.circleButton}
+          onPress={handleShare}
+          activeOpacity={0.7}
+        >
+          <AppText variant="subtitle" color="text">
+            ↗
           </AppText>
         </TouchableOpacity>
       </View>
@@ -308,7 +345,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    height: 90,
+    height: 100,
     backgroundColor: colors.background,
     opacity: 0.95,
   },
@@ -317,18 +354,26 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
-    height: 70,
-    backgroundColor: 'rgba(11, 14, 20, 0.4)',
+    height: 80,
+    backgroundColor: 'rgba(11, 14, 20, 0.5)',
   },
-  floatingHeader: {
+  floatingHeaderContainer: {
+    position: 'absolute',
+    left: spacing.md,
+    right: spacing.md,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    zIndex: 10,
+  },
+  floatingHeaderLeft: {
     position: 'absolute',
     left: spacing.md,
     zIndex: 10,
   },
-  backButton: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
+  circleButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     backgroundColor: 'rgba(11, 14, 20, 0.75)',
     alignItems: 'center',
     justifyContent: 'center',
@@ -348,7 +393,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xl,
   },
   posterWrapper: {
-    width: 120,
+    width: 125,
     aspectRatio: 2 / 3,
     borderRadius: 14,
     overflow: 'hidden',
@@ -392,8 +437,15 @@ const styles = StyleSheet.create({
   voteCount: {
     marginLeft: spacing.sm,
   },
-  runtimeRow: {
-    marginTop: spacing.xs,
+  specsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: spacing.xs,
+    marginTop: spacing.sm,
+  },
+  specBadge: {
+    paddingVertical: 2,
   },
   detailsLoadingContainer: {
     flexDirection: 'row',

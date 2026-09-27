@@ -3,6 +3,7 @@ export const API_ENDPOINTS = {
   POPULAR_MOVIES: '/movie/popular',
   TOP_RATED_MOVIES: '/movie/top_rated',
   NOW_PLAYING_MOVIES: '/movie/now_playing',
+  UPCOMING_MOVIES: '/movie/upcoming',
   MOVIE_DETAILS: (id: number) => `/movie/${id}`,
   MOVIE_CREDITS: (id: number) => `/movie/${id}/credits`,
 

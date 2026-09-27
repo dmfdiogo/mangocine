@@ -6,13 +6,18 @@ Aplicación móvil de alto rendimiento desarrollada en **React Native CLI** y **
 
 ## 📱 Capturas y Funcionalidades
 
-- **Listado de Películas:** Muestra películas populares con imágenes de póster optimizadas, títulos y calificaciones promedio (rating).
+- **Listado de Películas & Categorías Dinámicas:** Selector interactivo de categorías con chips animados para alternar sin recargas entre **Populares**, **Mejor Valoradas**, **En Cartelera** y **Próximamente**.
 - **Paginación Infinita:** Scroll infinito fluido con deduplicación y carga automática de páginas adicionales.
 - **Pull-to-Refresh:** Actualización rápida de la lista arrastrando hacia abajo.
 - **Barra de Búsqueda:** Búsqueda en tiempo real por nombre con optimización de *debounce* (400ms) y botón de limpieza inmediata.
-- **Pantalla de Detalle en Alta Resolución:** Visualización de póster y *backdrop* en resolución máxima (`original` / `w500`), título, fecha de estreno formateada, duración, calificación detallada, géneros organizados en badges y sinopsis completa.
-- **Estados de UI Visibles:**
-  - **Carga:** Skeletons placeholders durante la carga inicial y spinners discretos para paginación y obtención de detalles.
+- **Pantalla de Detalle en Alta Resolución:**
+  - Visualización de póster y *backdrop* en resolución máxima (`original` / `w500`).
+  - Botón nativo para **Compartir** la película mediante el Share Sheet del sistema (iOS/Android).
+  - Título, fecha de estreno formateada, duración, calificación detallada y géneros en badges.
+  - **Reparto Principal (*Cast*):** Carrusel horizontal con fotos de actores, nombres y personajes.
+  - Sinopsis completa y compañías de producción.
+- **Estados de UI Visibles y Pulidos:**
+  - **Carga:** Skeletons placeholders con **animación de pulso a 60fps** durante la carga inicial y spinners discretos para paginación.
   - **Error:** Vista de error con mensaje amigable y botón de **Reintentar** (*Retry*).
   - **Lista Vacía:** Retroalimentación cuando la búsqueda no arroja resultados o la lista está vacía, con botón para resetear la consulta.
 
