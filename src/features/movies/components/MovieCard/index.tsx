@@ -17,12 +17,14 @@ import { formatReleaseYear } from '@shared/utils/formatters';
 export interface MovieCardProps {
   movie: MovieDTO;
   onPress: (movie: MovieDTO) => void;
+  onPressIn?: (movie: MovieDTO) => void;
   width?: number;
 }
 
 export const MovieCardComponent: React.FC<MovieCardProps> = ({
   movie,
   onPress,
+  onPressIn,
   width,
 }) => {
   const [imageLoading, setImageLoading] = useState(true);
@@ -35,10 +37,17 @@ export const MovieCardComponent: React.FC<MovieCardProps> = ({
     onPress(movie);
   };
 
+  const handlePressIn = () => {
+    if (onPressIn) {
+      onPressIn(movie);
+    }
+  };
+
   return (
     <TouchableOpacity
       activeOpacity={0.8}
       onPress={handlePress}
+      onPressIn={handlePressIn}
       style={[styles.card, width ? { width } : undefined]}
     >
       <View style={styles.posterContainer}>

@@ -55,7 +55,9 @@ src/
 ├── features/                         # Fórmulas de Dominio (Vertical Slices)
 │   ├── movies/                       # Módulo de Películas
 │   │   ├── api/                      # RTK Query slice (moviesApi.ts, types.ts)
-│   │   ├── components/               # MovieCard, MovieCardSkeleton, RatingBadge
+│   │   ├── store/                    # Redux Slice (moviesSlice.ts) para filtros y páginas
+│   │   ├── hooks/                    # ViewModel Hook (useMoviesFlow.ts)
+│   │   ├── components/               # MovieCard, MovieCardSkeleton, RatingBadge, CastList
 │   │   ├── screens/                  # MovieListScreen, MovieDetailScreen
 │   │   └── index.ts                  # Public API del módulo de películas
 │   │

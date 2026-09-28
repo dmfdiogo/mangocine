@@ -3,6 +3,7 @@ import {
   View,
   TextInput,
   TouchableOpacity,
+  ActivityIndicator,
   StyleSheet,
   ViewStyle,
 } from 'react-native';
@@ -15,6 +16,7 @@ export interface SearchBarProps {
   onChangeText: (text: string) => void;
   onClear?: () => void;
   placeholder?: string;
+  loading?: boolean;
   style?: ViewStyle;
 }
 
@@ -23,6 +25,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   onChangeText,
   onClear,
   placeholder = 'Buscar películas...',
+  loading = false,
   style,
 }) => {
   const handleClear = () => {
@@ -49,7 +52,15 @@ export const SearchBar: React.FC<SearchBarProps> = ({
         autoCorrect={false}
       />
 
-      {value.length > 0 && (
+      {loading && (
+        <ActivityIndicator
+          size="small"
+          color={colors.primary}
+          style={styles.spinner}
+        />
+      )}
+
+      {value.length > 0 && !loading && (
         <TouchableOpacity
           onPress={handleClear}
           style={styles.clearButton}
@@ -87,6 +98,9 @@ const styles = StyleSheet.create({
     color: colors.text,
     fontSize: 15,
     paddingVertical: 0,
+  },
+  spinner: {
+    marginRight: spacing.xs,
   },
   clearButton: {
     padding: spacing.xs,

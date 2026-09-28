@@ -1,5 +1,7 @@
 export * from './api/moviesApi';
 export * from './api/types';
+export * from './store/moviesSlice';
+export * from './hooks/useMoviesFlow';
 export * from './components/MovieCard';
 export * from './components/MovieCardSkeleton';
 export * from './components/RatingBadge';

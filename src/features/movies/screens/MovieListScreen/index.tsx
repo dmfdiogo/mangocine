@@ -1,29 +1,24 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   View,
   FlatList,
   StyleSheet,
   ActivityIndicator,
   RefreshControl,
+  TouchableOpacity,
   useWindowDimensions,
   ListRenderItem,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppText } from '@shared/components/ui/Text';
-import { SearchBar, useDebounce } from '@features/search';
+import { SearchBar } from '@features/search';
 import { MovieCard } from '@features/movies/components/MovieCard';
 import { MovieCardSkeleton } from '@features/movies/components/MovieCardSkeleton';
-import {
-  CategoryFilterTabs,
-  CATEGORIES,
-} from '@features/movies/components/CategoryFilterTabs';
+import { CategoryFilterTabs } from '@features/movies/components/CategoryFilterTabs';
 import { ErrorView } from '@shared/components/feedback/ErrorView';
 import { EmptyStateView } from '@shared/components/feedback/EmptyStateView';
-import {
-  useGetMoviesByCategoryQuery,
-  useSearchMoviesQuery,
-} from '@features/movies/api/moviesApi';
-import { MovieDTO, MovieCategory } from '@features/movies/api/types';
+import { useMoviesFlow } from '@features/movies/hooks/useMoviesFlow';
+import { MovieDTO } from '@features/movies/api/types';
 import { MovieListScreenProps } from '@navigation/types';
 import { ROUTES } from '@navigation/routes';
 import { colors } from '@shared/theme/colors';
@@ -35,32 +30,30 @@ export const MovieListScreen: React.FC<MovieListScreenProps> = ({ navigation }) 
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
 
-  // Search input and debounce state
-  const [searchInput, setSearchInput] = useState('');
-  const debouncedQuery = useDebounce(searchInput.trim(), 400);
-
-  // Category and pagination states
-  const [selectedCategory, setSelectedCategory] = useState<MovieCategory>('popular');
-  const [categoryPage, setCategoryPage] = useState(1);
-  const [searchPage, setSearchPage] = useState(1);
-  const [isRefreshing, setIsRefreshing] = useState(false);
-
-  const isSearchMode = debouncedQuery.length >= 2;
-
-  // Category movies query (popular, top_rated, now_playing, upcoming)
-  const categoryQueryResult = useGetMoviesByCategoryQuery(
-    { category: selectedCategory, page: categoryPage },
-    { skip: isSearchMode }
-  );
-
-  // Search movies query
-  const searchQueryResult = useSearchMoviesQuery(
-    { query: debouncedQuery, page: searchPage },
-    { skip: !isSearchMode }
-  );
-
-  const activeQuery = isSearchMode ? searchQueryResult : categoryQueryResult;
-  const { data, isLoading, isFetching, isError, refetch } = activeQuery;
+  // Clean Flow Hook (ViewModel pattern)
+  const {
+    movies,
+    totalResults,
+    selectedCategory,
+    searchQuery,
+    debouncedQuery,
+    isSearchMode,
+    isDebouncing,
+    isLoading,
+    isFetching,
+    isError,
+    isPaginationError,
+    isRefreshing,
+    currentCategoryLabel,
+    onCategoryChange,
+    onSearchChange,
+    onClearSearch,
+    onEndReached,
+    onRefresh,
+    onRetry,
+    onRetryPagination,
+    onMoviePrefetch,
+  } = useMoviesFlow();
 
   // Grid layout calculation
   const horizontalPadding = spacing.md * 2;
@@ -82,61 +75,23 @@ export const MovieListScreen: React.FC<MovieListScreenProps> = ({ navigation }) 
     [navigation]
   );
 
-  // Category change handler
-  const handleCategoryChange = useCallback((category: MovieCategory) => {
-    setSelectedCategory(category);
-    setCategoryPage(1);
-  }, []);
-
-  // Pagination trigger (Infinite Scroll)
-  const handleEndReached = useCallback(() => {
-    if (isFetching || isLoading) return;
-
-    if (data && data.page < data.total_pages) {
-      if (isSearchMode) {
-        setSearchPage((prev) => prev + 1);
-      } else {
-        setCategoryPage((prev) => prev + 1);
-      }
-    }
-  }, [data, isFetching, isLoading, isSearchMode]);
-
-  // Pull-to-refresh
-  const handleRefresh = useCallback(async () => {
-    setIsRefreshing(true);
-    if (isSearchMode) {
-      setSearchPage(1);
-    } else {
-      setCategoryPage(1);
-    }
-    try {
-      await refetch();
-    } finally {
-      setIsRefreshing(false);
-    }
-  }, [isSearchMode, refetch]);
-
-  // Render movie card item
+  // Render movie card item with optimistic prefetching
   const renderItem: ListRenderItem<MovieDTO> = useCallback(
     ({ item }) => (
       <MovieCard
         movie={item}
         width={itemWidth}
         onPress={handleMoviePress}
+        onPressIn={onMoviePrefetch}
       />
     ),
-    [itemWidth, handleMoviePress]
+    [itemWidth, handleMoviePress, onMoviePrefetch]
   );
 
   // Key extractor
   const keyExtractor = useCallback((item: MovieDTO) => String(item.id), []);
 
-  const currentCategoryLabel = useMemo(() => {
-    const found = CATEGORIES.find((c) => c.id === selectedCategory);
-    return found ? `${found.icon} ${found.label}` : 'Películas';
-  }, [selectedCategory]);
-
-  // List header with branding, search bar, and category tabs
+  // List header with branding, search bar with loader, and category tabs
   const renderListHeader = useMemo(() => {
     return (
       <View style={styles.headerContainer}>
@@ -152,25 +107,18 @@ export const MovieListScreen: React.FC<MovieListScreenProps> = ({ navigation }) 
         </View>
 
         <SearchBar
-          value={searchInput}
-          onChangeText={(text) => {
-            setSearchInput(text);
-            if (text.trim().length >= 2) {
-              setSearchPage(1);
-            }
-          }}
-          onClear={() => {
-            setSearchInput('');
-            setSearchPage(1);
-          }}
+          value={searchQuery}
+          onChangeText={onSearchChange}
+          onClear={onClearSearch}
           placeholder="Buscar películas por título..."
+          loading={isDebouncing || (isSearchMode && isFetching)}
           style={styles.searchBar}
         />
 
         {!isSearchMode && (
           <CategoryFilterTabs
             selectedCategory={selectedCategory}
-            onSelectCategory={handleCategoryChange}
+            onSelectCategory={onCategoryChange}
             style={styles.categoryTabs}
           />
         )}
@@ -181,39 +129,67 @@ export const MovieListScreen: React.FC<MovieListScreenProps> = ({ navigation }) 
               ? `Resultados para "${debouncedQuery}"`
               : currentCategoryLabel}
           </AppText>
-          {data && (
+          {totalResults > 0 && (
             <AppText variant="caption" color="textMuted">
-              {data.total_results.toLocaleString()} títulos
+              {totalResults.toLocaleString()} títulos
             </AppText>
           )}
         </View>
       </View>
     );
   }, [
-    searchInput,
+    searchQuery,
+    onSearchChange,
+    onClearSearch,
+    isDebouncing,
     isSearchMode,
+    isFetching,
     selectedCategory,
-    handleCategoryChange,
+    onCategoryChange,
     debouncedQuery,
     currentCategoryLabel,
-    data,
+    totalResults,
   ]);
 
-  // List footer loader for infinite scroll
+  // Resilient footer loader & error handler
   const renderListFooter = useMemo(() => {
-    if (!isFetching || isLoading) return undefined;
-    return (
-      <View style={styles.footerLoader}>
-        <ActivityIndicator size="small" color={colors.primary} />
-        <AppText variant="caption" color="textMuted" style={styles.footerText}>
-          Cargando más películas...
-        </AppText>
-      </View>
-    );
-  }, [isFetching, isLoading]);
+    // Pagination error state (keeps existing movies visible!)
+    if (isPaginationError) {
+      return (
+        <View style={styles.footerErrorContainer}>
+          <AppText variant="caption" color="error" style={styles.footerErrorText}>
+            No se pudieron cargar más películas.
+          </AppText>
+          <TouchableOpacity
+            onPress={onRetryPagination}
+            activeOpacity={0.7}
+            style={styles.footerRetryButton}
+          >
+            <AppText variant="tag" color="text">
+              Reintentar
+            </AppText>
+          </TouchableOpacity>
+        </View>
+      );
+    }
+
+    // Pagination loading spinner
+    if (isFetching && !isLoading) {
+      return (
+        <View style={styles.footerLoader}>
+          <ActivityIndicator size="small" color={colors.primary} />
+          <AppText variant="caption" color="textMuted" style={styles.footerText}>
+            Cargando más películas...
+          </AppText>
+        </View>
+      );
+    }
+
+    return undefined;
+  }, [isPaginationError, onRetryPagination, isFetching, isLoading]);
 
   // Initial loading state (Skeleton Grid)
-  if (isLoading && !data) {
+  if (isLoading) {
     return (
       <View style={[styles.screen, { paddingTop: insets.top }]}>
         <View style={styles.headerContainer}>
@@ -223,8 +199,8 @@ export const MovieListScreen: React.FC<MovieListScreenProps> = ({ navigation }) 
             </AppText>
           </View>
           <SearchBar
-            value={searchInput}
-            onChangeText={setSearchInput}
+            value={searchQuery}
+            onChangeText={onSearchChange}
             style={styles.searchBar}
           />
         </View>
@@ -237,21 +213,21 @@ export const MovieListScreen: React.FC<MovieListScreenProps> = ({ navigation }) 
     );
   }
 
-  // Error state (Initial load failed)
-  if (isError && (!data || data.results.length === 0)) {
+  // Initial Error state
+  if (isError) {
     return (
       <View style={[styles.screen, { paddingTop: insets.top }]}>
         <View style={styles.headerContainer}>
           <SearchBar
-            value={searchInput}
-            onChangeText={setSearchInput}
+            value={searchQuery}
+            onChangeText={onSearchChange}
             style={styles.searchBar}
           />
         </View>
         <ErrorView
           title="Error al cargar películas"
           message="No se pudo conectar con el servicio de TMDB. Por favor, revisa tu conexión e inténtalo nuevamente."
-          onRetry={refetch}
+          onRetry={onRetry}
         />
       </View>
     );
@@ -260,7 +236,7 @@ export const MovieListScreen: React.FC<MovieListScreenProps> = ({ navigation }) 
   return (
     <View style={[styles.screen, { paddingTop: insets.top }]}>
       <FlatList
-        data={data?.results || []}
+        data={movies}
         keyExtractor={keyExtractor}
         renderItem={renderItem}
         numColumns={2}
@@ -277,18 +253,18 @@ export const MovieListScreen: React.FC<MovieListScreenProps> = ({ navigation }) 
                   ? `No encontramos películas con el término "${debouncedQuery}". Intenta con otro nombre.`
                   : 'No hay películas disponibles en este momento.'
               }
-              onAction={isSearchMode ? () => setSearchInput('') : refetch}
+              onAction={isSearchMode ? onClearSearch : onRetry}
               actionTitle={isSearchMode ? 'Limpiar búsqueda' : 'Recargar'}
             />
           ) : undefined
         }
-        onEndReached={handleEndReached}
+        onEndReached={onEndReached}
         onEndReachedThreshold={0.5}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
             refreshing={isRefreshing}
-            onRefresh={handleRefresh}
+            onRefresh={onRefresh}
             tintColor={colors.primary}
             colors={[colors.primary]}
           />
@@ -359,5 +335,25 @@ const styles = StyleSheet.create({
   },
   footerText: {
     marginTop: spacing.xs,
+  },
+  footerErrorContainer: {
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.lg,
+    alignItems: 'center',
+    backgroundColor: colors.surfaceElevated,
+    marginHorizontal: spacing.md,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.border,
+    marginBottom: spacing.md,
+  },
+  footerErrorText: {
+    marginBottom: spacing.xs,
+  },
+  footerRetryButton: {
+    backgroundColor: colors.primary,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    borderRadius: 8,
   },
 });
