@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import {
   View,
   FlatList,
@@ -60,9 +60,18 @@ export const MovieListScreen: React.FC<MovieListScreenProps> = ({ navigation }) 
   const columnGap = spacing.md;
   const itemWidth = (width - horizontalPadding - columnGap) / 2;
 
-  // Navigate to details
+  // Ref to prevent double-click / rapid re-entrance navigation
+  const lastNavigationTime = useRef<number>(0);
+
+  // Navigate to details (with double-click protection)
   const handleMoviePress = useCallback(
     (movie: MovieDTO) => {
+      const now = Date.now();
+      if (now - lastNavigationTime.current < 600) {
+        return;
+      }
+      lastNavigationTime.current = now;
+
       navigation.navigate(ROUTES.MOVIE_DETAIL, {
         movieId: movie.id,
         title: movie.title,

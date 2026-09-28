@@ -7,8 +7,9 @@
     "ios": "react-native run-ios",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "start": "react-native start",
-    "test": "jest --forceExit"
+    "test": "jest --forceExit",
+    "validate": "npm run typecheck && npm test",
+    "start": "react-native start"
   },
   "dependencies": {
     "@react-native/new-app-screen": "0.87.1",
