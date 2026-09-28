@@ -1,4 +1,4 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction, createSelector } from '@reduxjs/toolkit';
 import { MovieCategory } from '../api/types';
 import type { RootState } from '@app/store';
 
@@ -74,9 +74,26 @@ export const {
   resetAllFilters,
 } = moviesSlice.actions;
 
-// Selectors
+// Base selectors
+export const selectMoviesState = (state: RootState) => state.movies;
 export const selectSelectedCategory = (state: RootState) => state.movies.selectedCategory;
 export const selectSearchQuery = (state: RootState) => state.movies.searchQuery;
 export const selectCategoryPage = (state: RootState) => state.movies.categoryPage;
 export const selectSearchPage = (state: RootState) => state.movies.searchPage;
 export const selectPaginationError = (state: RootState) => state.movies.paginationError;
+
+// Memoized derived selectors via createSelector (Reselect)
+export const selectTrimmedSearchQuery = createSelector(
+  [selectSearchQuery],
+  (query): string => query.trim()
+);
+
+export const selectIsSearchActive = createSelector(
+  [selectTrimmedSearchQuery],
+  (trimmed): boolean => trimmed.length >= 2
+);
+
+export const selectCurrentActivePage = createSelector(
+  [selectIsSearchActive, selectCategoryPage, selectSearchPage],
+  (isSearch, catPage, sPage): number => (isSearch ? sPage : catPage)
+);

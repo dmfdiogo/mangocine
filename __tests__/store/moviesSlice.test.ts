@@ -8,8 +8,12 @@ import {
   resetSearchPage,
   setPaginationError,
   resetAllFilters,
+  selectTrimmedSearchQuery,
+  selectIsSearchActive,
+  selectCurrentActivePage,
   MoviesState,
 } from '@features/movies/store/moviesSlice';
+import type { RootState } from '@app/store';
 
 describe('moviesSlice', () => {
   const initialState: MoviesState = {
@@ -73,5 +77,32 @@ describe('moviesSlice', () => {
 
     const nextState = moviesSlice.reducer(dirtyState, resetAllFilters());
     expect(nextState).toEqual(initialState);
+  });
+
+  describe('memoized selectors', () => {
+    it('selectTrimmedSearchQuery trims whitespace', () => {
+      const state = { movies: { ...initialState, searchQuery: '  Batman  ' } } as RootState;
+      expect(selectTrimmedSearchQuery(state)).toBe('Batman');
+    });
+
+    it('selectIsSearchActive returns true only when query >= 2 chars', () => {
+      const shortState = { movies: { ...initialState, searchQuery: 'a' } } as RootState;
+      expect(selectIsSearchActive(shortState)).toBe(false);
+
+      const activeState = { movies: { ...initialState, searchQuery: 'Dune' } } as RootState;
+      expect(selectIsSearchActive(activeState)).toBe(true);
+    });
+
+    it('selectCurrentActivePage returns searchPage when searching, categoryPage otherwise', () => {
+      const categoryState = {
+        movies: { ...initialState, categoryPage: 3, searchPage: 1, searchQuery: '' },
+      } as RootState;
+      expect(selectCurrentActivePage(categoryState)).toBe(3);
+
+      const searchingState = {
+        movies: { ...initialState, categoryPage: 3, searchPage: 5, searchQuery: 'Matrix' },
+      } as RootState;
+      expect(selectCurrentActivePage(searchingState)).toBe(5);
+    });
   });
 });

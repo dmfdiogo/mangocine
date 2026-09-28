@@ -159,19 +159,22 @@ npm test
 
 Las pruebas cubren:
 - Montaje del árbol de componentes raíz y proveedores (`App.test.tsx`).
-- Componentes de UI y estados de feedback (`RatingBadge`, `Badge`, `Button`, `ErrorView`, `EmptyStateView`).
-- Utilitarios de formato de fecha en español, cálculo de duración y calificaciones numéricas.
-- Construcción y resolución de URLs de imágenes del TMDB en distintas densidades (`w342`, `w500`, `original`).
+- Redux Slice de películas y seletores memoizados con `createSelector` (`moviesSlice.test.ts`).
+- Redux Slice normalizado de favoritos con operaciones CRUD (`favoritesSlice.test.ts`).
+- Componentes de UI, pestañas de categorías y estados de feedback (`ui.test.tsx`).
+- Utilitarios de formato de fecha en español, cálculo de duración y calificaciones numéricas (`formatters.test.ts`).
+- Construcción y resolución de URLs de imágenes del TMDB en distintas densidades (`imageHelpers.test.ts`).
 
 ---
 
 ## 💡 Decisiones Técnicas Destacadas
 
-1. **Redux Toolkit + RTK Query:**
-   - Cumple de forma nativa con el requisito de gestión de estado global.
-   - Elimina boilerplate excesivo en comparación con Redux clásico.
-   - Soporte automático para caché de peticiones, evitando solicitudes duplicadas de la misma película al navegar entre pantallas.
-   - Función de fusión (*merge*) para paginación infinita sin mutaciones indebidas ni elementos duplicados.
+1. **Redux Toolkit + RTK Query (Capa Redux de Alto Nivel):**
+   - **Gestión de Estado Global Dual:** Combina RTK Query para sincronización de red con un slice de domínio normalizado (`favoritesSlice`) y de filtros (`moviesSlice`).
+   - **Estructura de Datos Normalizada:** El slice de favoritos implementa el patrón estándar de la industria `{ byId, allIds }`, garantizando lecturas O(1) al verificar si una película es favorita.
+   - **Seletores Memoizados (`createSelector` / Reselect):** Evita recalcular datos derivados innecesariamente, previniendo re-renderizados en la UI.
+   - **Middleware Global de Errores (`rtkQueryErrorLogger`):** Intercepta de forma centralizada cualquier acción `isRejectedWithValue` para telemetría y diagnóstico sin saturar los componentes.
+   - **Prefetching Optimista en Toque (`onPressIn`):** Dispara `moviesApi.util.prefetch` en milisegundos para que los detalles ya estén en memoria cuando la pantalla se abre.
 
 2. **Optimización de Rendimiento en Listas:**
    - Implementación de `FlatList` configurada con `removeClippedSubviews={true}`, `maxToRenderPerBatch={10}` y `windowSize={10}` para garantizar una tasa de refresco constante de 60fps.

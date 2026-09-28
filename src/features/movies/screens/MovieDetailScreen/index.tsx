@@ -13,9 +13,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppText } from '@shared/components/ui/Text';
 import { Badge } from '@shared/components/ui/Badge';
 import { RatingBadge } from '@features/movies/components/RatingBadge';
+import { FavoriteButton } from '@features/movies/components/FavoriteButton';
 import { CastList } from '@features/movies/components/CastList';
 import { ErrorView } from '@shared/components/feedback/ErrorView';
 import { useGetMovieDetailsQuery } from '@features/movies/api/moviesApi';
+import { MovieDTO } from '@features/movies/api/types';
 import { MovieDetailScreenProps } from '@navigation/types';
 import { colors } from '@shared/theme/colors';
 import { spacing } from '@shared/theme/spacing';
@@ -97,6 +99,19 @@ export const MovieDetailScreen: React.FC<MovieDetailScreenProps> = ({
       </View>
     );
   }
+
+  const currentMovie: MovieDTO = {
+    id: movieId,
+    title: movieDetails?.title || title,
+    original_title: movieDetails?.original_title || title,
+    overview: movieDetails?.overview || '',
+    poster_path: posterPath ?? null,
+    backdrop_path: backdropPath ?? null,
+    release_date: releaseDate || '',
+    vote_average: voteAverage || 0,
+    vote_count: movieDetails?.vote_count || 0,
+    popularity: movieDetails?.popularity || 0,
+  };
 
   return (
     <View style={styles.screen}>
@@ -304,15 +319,19 @@ export const MovieDetailScreen: React.FC<MovieDetailScreenProps> = ({
           </AppText>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.circleButton}
-          onPress={handleShare}
-          activeOpacity={0.7}
-        >
-          <AppText variant="subtitle" color="text">
-            ↗
-          </AppText>
-        </TouchableOpacity>
+        <View style={styles.headerRightActions}>
+          <FavoriteButton movie={currentMovie} size="medium" />
+
+          <TouchableOpacity
+            style={styles.circleButton}
+            onPress={handleShare}
+            activeOpacity={0.7}
+          >
+            <AppText variant="subtitle" color="text">
+              ↗
+            </AppText>
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );
@@ -364,6 +383,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     zIndex: 10,
+  },
+  headerRightActions: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    alignItems: 'center',
   },
   floatingHeaderLeft: {
     position: 'absolute',

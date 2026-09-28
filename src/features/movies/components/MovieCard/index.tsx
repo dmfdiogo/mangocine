@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import { AppText } from '@shared/components/ui/Text';
 import { RatingBadge } from '../RatingBadge';
+import { FavoriteButton } from '../FavoriteButton';
 import { MovieDTO } from '@features/movies/api/types';
 import { colors } from '@shared/theme/colors';
 import { spacing } from '@shared/theme/spacing';
@@ -86,6 +87,11 @@ export const MovieCardComponent: React.FC<MovieCardProps> = ({
           </View>
         )}
 
+        {/* Favorite Button Overlay */}
+        <View style={styles.favoriteOverlay}>
+          <FavoriteButton movie={movie} size="small" />
+        </View>
+
         {/* Rating Badge Overlay */}
         <View style={styles.badgeOverlay}>
           <RatingBadge rating={movie.vote_average} size="small" />
@@ -147,6 +153,12 @@ const styles = StyleSheet.create({
   },
   fallbackTitle: {
     marginTop: spacing.xs,
+  },
+  favoriteOverlay: {
+    position: 'absolute',
+    top: spacing.sm,
+    left: spacing.sm,
+    zIndex: 2,
   },
   badgeOverlay: {
     position: 'absolute',
