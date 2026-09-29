@@ -1,13 +1,15 @@
 # 🥭 MangoCine
 
 > Catálogo de filmes (TMDB) em **React Native CLI + TypeScript**, com arquitetura
-> modular, i18n (es-PY / pt-BR) e foco em performance de listas longas.
+> modular, i18n (es-PY / pt-BR), testes abrangentes e foco em performance de
+> listas longas.
 
 ![React Native](https://img.shields.io/badge/React_Native-0.87-61DAFB?logo=react&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)
 ![Redux Toolkit](https://img.shields.io/badge/Redux_Toolkit-RTK_Query-764ABC?logo=redux&logoColor=white)
 ![Tests](https://img.shields.io/badge/tests-139_passing-10B981)
 ![Coverage](https://img.shields.io/badge/coverage-96%25-10B981)
+![CI](https://github.com/dmfdiogo/mangocine/actions/workflows/ci.yml/badge.svg)
 ![Platforms](https://img.shields.io/badge/iOS_%7C_Android-suportados-111)
 
 ---
@@ -19,8 +21,8 @@ npm install
 npm run ios     # ou: npm run android
 ```
 
-Funciona **sem configuração**: usa uma API key pública read-only do TMDB. Para
-usar a sua, crie um `.env` (`cp .env.example .env`).
+Funciona **sem configuração**: o app já vem com uma API key pública read-only do
+TMDB. Para usar a sua, basta trocar o valor em `src/app/config/env.ts`.
 
 ---
 
@@ -43,15 +45,16 @@ usar a sua, crie um `.env` (`cp .env.example .env`).
 
 ## 🧱 Stack
 
-| Camada          | Escolha                                                                       |
-| :-------------- | :---------------------------------------------------------------------------- |
-| App             | React Native CLI 0.87 + New Architecture + Hermes                             |
-| Linguagem       | TypeScript estrito (sem `any`)                                                |
-| Estado/dados    | Redux Toolkit + RTK Query (cache, dedupe, prefetch)                           |
-| Navegação       | React Navigation (Native Stack, tipado)                                       |
-| Layout          | `react-native-safe-area-context` (notch/status bar)                           |
-| Testes          | Jest + Testing Library (unitário e integração) + Maestro (E2E)                |
-| Observabilidade | Logger estruturado próprio + `ErrorBoundary` global + monitor de FPS dev-only |
+| Camada          | Escolha                                                               |
+| :-------------- | :-------------------------------------------------------------------- |
+| App             | React Native CLI 0.87 + New Architecture + Hermes                     |
+| Linguagem       | TypeScript estrito (sem `any`)                                        |
+| Estado/dados    | Redux Toolkit + RTK Query (cache, dedupe, prefetch)                   |
+| Navegação       | React Navigation (Native Stack, tipado)                               |
+| Layout          | `react-native-safe-area-context` (notch/status bar)                   |
+| Imagens         | `@d11/react-native-fast-image` (cache memória/disco + priority)       |
+| Testes          | Jest + Testing Library (unitário e integração) + Maestro (E2E)        |
+| Observabilidade | Logger estruturado + `ErrorBoundary` global + monitor de FPS dev-only |
 
 ---
 
@@ -62,12 +65,31 @@ Feature-driven com núcleo compartilhado:
 ```text
 src/
 ├── app/          # bootstrap, store, providers, config
-├── features/     # vertical slices: movies, search, onboarding
+├── features/     # vertical slices: movies, search, favorites, onboarding
 ├── navigation/   # stack, rotas e tipos
-└── shared/       # api, i18n, theme, componentes e utils (agnóstico de domínio)
+└── shared/       # api, i18n, theme, perf, componentes e utils (agnóstico de domínio)
 ```
 
-> Justificativas e trade-offs: [`docs/`](docs).
+Princípios: domínios isolados com _public API_ por `index.ts`, estado de rede no
+RTK Query e regras de UI em hooks de fluxo (ex.: `useMoviesFlow` como
+_ViewModel_). Justificativas e trade-offs em [`docs/`](docs).
+
+---
+
+## ✅ Qualidade
+
+|                            |                                                         |
+| :------------------------- | :------------------------------------------------------ |
+| **139** testes (33 suítes) | unitários + integração (Testing Library)                |
+| **~96%** de cobertura      | statements/lines, com _thresholds_ no CI                |
+| **4** fluxos E2E           | Maestro (welcome, busca, favoritos, idioma)             |
+| **CI**                     | jobs de lint, typecheck, testes+cobertura e E2E Android |
+
+```bash
+npm run validate         # typecheck + testes
+npm run test:coverage    # cobertura com thresholds
+maestro test .maestro    # E2E (ver docs/e2e.md)
+```
 
 ---
 
@@ -95,8 +117,9 @@ src/
 
 ## 🔐 Segurança
 
-Sem segredos versionados; credenciais via `.env`; logging só em `__DEV__`;
-assinatura de release fora do repositório. Detalhes: [README § Segurança](docs/seguranca.md).
+Sem segredos reais versionados (apenas a API key demo, pública e read-only);
+logging de console restrito a `__DEV__`; assinatura de release fora do
+repositório. Detalhes: [`docs/seguranca.md`](docs/seguranca.md).
 
 ---
 
@@ -117,4 +140,4 @@ assinatura de release fora do repositório. Detalhes: [README § Segurança](doc
 
 - Séries de TV (Bottom Tabs reutilizando o _shared core_).
 - Cache offline (`react-native-mmkv` + `redux-persist`).
-- Testes E2E (Maestro/Detox) e transições com `react-native-reanimated`.
+- Transições com `react-native-reanimated` (shared elements).
