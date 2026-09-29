@@ -26,6 +26,18 @@ TMDB. Para usar a sua, basta trocar o valor em `src/app/config/env.ts`.
 
 ---
 
+## Screenshots
+
+|                          Landing                          |                         Catálogo                          |                          Busca                           |
+| :-------------------------------------------------------: | :-------------------------------------------------------: | :------------------------------------------------------: |
+| <img src="docs/screenshots/01-welcome.jpg" width="220" /> | <img src="docs/screenshots/02-catalog.jpg" width="220" /> | <img src="docs/screenshots/03-search.jpg" width="220" /> |
+
+|                         Detalhe                          |                          Favoritos                          |                     Menu / idioma                      |
+| :------------------------------------------------------: | :---------------------------------------------------------: | :----------------------------------------------------: |
+| <img src="docs/screenshots/04-detail.jpg" width="220" /> | <img src="docs/screenshots/05-favorites.jpg" width="220" /> | <img src="docs/screenshots/06-menu.jpg" width="220" /> |
+
+---
+
 ## Funcionalidades
 
 - **Catálogo** com 4 categorias (Populares, Melhor Avaliadas, Em Cartaz, Em Breve).
