@@ -1,4 +1,4 @@
-# 🥭 MangoCine
+# MangoCine
 
 > Catálogo de filmes (TMDB) em **React Native CLI + TypeScript**, com arquitetura
 > modular, i18n (es-PY / pt-BR), testes abrangentes e foco em performance de
@@ -14,7 +14,7 @@
 
 ---
 
-## ⚡ TL;DR
+## TL;DR
 
 ```bash
 npm install
@@ -26,24 +26,22 @@ TMDB. Para usar a sua, basta trocar o valor em `src/app/config/env.ts`.
 
 ---
 
-## ✨ Funcionalidades
+## Funcionalidades
 
-|     | Recurso                                                                                       |
-| :-- | :-------------------------------------------------------------------------------------------- |
-| 🎬  | **Catálogo** com 4 categorias (Populares, Melhor Avaliadas, Em Cartaz, Em Breve)              |
-| ♾️  | **Scroll infinito** com deduplicação + pull-to-refresh                                        |
-| 🔍  | **Busca em tempo real** com debounce (400ms)                                                  |
-| 🖼️  | **Detalhe** com backdrop/pôster em alta resolução, gêneros, elenco e sinopse                  |
-| ❤️  | **Favoritos** normalizados (`{ byId, allIds }`, O(1)) + tela dedicada, persistidos localmente |
-| 🌎  | **i18n** pt-BR / es-PY com troca em runtime                                                   |
-| 🥭  | **Landing de branding** + botão para o catálogo                                               |
-| ☰   | **Menu hamburger** no cabeçalho com seletor de idioma                                         |
-| 💀  | **Skeletons** pulsantes (60fps, native driver) em listas e imagens                            |
-| 📤  | **Compartilhar** via share sheet nativo (iOS/Android)                                         |
+- **Catálogo** com 4 categorias (Populares, Melhor Avaliadas, Em Cartaz, Em Breve).
+- **Scroll infinito** com deduplicação + pull-to-refresh.
+- **Busca em tempo real** com debounce (400ms).
+- **Detalhe** com backdrop/pôster em alta resolução, gêneros, elenco e sinopse.
+- **Favoritos** normalizados (`{ byId, allIds }`, O(1)) + tela dedicada, persistidos localmente.
+- **i18n** pt-BR / es-PY com troca em runtime.
+- **Landing de branding** + botão para o catálogo.
+- **Menu hamburger** no cabeçalho com seletor de idioma.
+- **Skeletons** pulsantes (60fps, native driver) em listas e imagens.
+- **Compartilhar** via share sheet nativo (iOS/Android).
 
 ---
 
-## 🧱 Stack
+## Stack
 
 | Camada          | Escolha                                                               |
 | :-------------- | :-------------------------------------------------------------------- |
@@ -58,7 +56,7 @@ TMDB. Para usar a sua, basta trocar o valor em `src/app/config/env.ts`.
 
 ---
 
-## 🏗️ Arquitetura
+## Arquitetura
 
 Feature-driven com núcleo compartilhado:
 
@@ -76,14 +74,14 @@ _ViewModel_). Justificativas e trade-offs em [`docs/`](docs).
 
 ---
 
-## ✅ Qualidade
+## Qualidade
 
-|                            |                                                         |
-| :------------------------- | :------------------------------------------------------ |
-| **139** testes (33 suítes) | unitários + integração (Testing Library)                |
-| **~96%** de cobertura      | statements/lines, com _thresholds_ no CI                |
-| **4** fluxos E2E           | Maestro (welcome, busca, favoritos, idioma)             |
-| **CI**                     | jobs de lint, typecheck, testes+cobertura e E2E Android |
+|                               |                                                         |
+| :---------------------------- | :------------------------------------------------------ |
+| ✅ **139** testes (33 suítes) | unitários + integração (Testing Library)                |
+| ✅ **~96%** de cobertura      | statements/lines, com _thresholds_ no CI                |
+| ✅ **4** fluxos E2E           | Maestro (welcome, busca, favoritos, idioma)             |
+| ✅ **CI**                     | jobs de lint, typecheck, testes+cobertura e E2E Android |
 
 ```bash
 npm run validate         # typecheck + testes
@@ -93,7 +91,7 @@ maestro test .maestro    # E2E (ver docs/e2e.md)
 
 ---
 
-## 📜 Scripts
+## Scripts
 
 | Comando                           | O que faz                                    |
 | :-------------------------------- | :------------------------------------------- |
@@ -107,7 +105,7 @@ maestro test .maestro    # E2E (ver docs/e2e.md)
 
 ---
 
-## 🌎 Idiomas
+## Idiomas
 
 - **pt-BR** e **es-PY** (espanhol do Paraguai) selecionáveis pelo menu.
 - Textos centralizados em `src/shared/i18n/translations.ts`.
@@ -115,7 +113,7 @@ maestro test .maestro    # E2E (ver docs/e2e.md)
 
 ---
 
-## 🔐 Segurança
+## Segurança
 
 Sem segredos reais versionados (apenas a API key demo, pública e read-only);
 logging de console restrito a `__DEV__`; assinatura de release fora do
@@ -123,7 +121,7 @@ repositório. Detalhes: [`docs/seguranca.md`](docs/seguranca.md).
 
 ---
 
-## 📚 Documentação adicional
+## Documentação adicional
 
 | Documento                                                                          | Conteúdo                                      |
 | :--------------------------------------------------------------------------------- | :-------------------------------------------- |
@@ -136,7 +134,7 @@ repositório. Detalhes: [`docs/seguranca.md`](docs/seguranca.md).
 
 ---
 
-## 🔮 Próximos passos
+## Próximos passos
 
 - Séries de TV (Bottom Tabs reutilizando o _shared core_).
 - Cache offline (`react-native-mmkv` + `redux-persist`).
