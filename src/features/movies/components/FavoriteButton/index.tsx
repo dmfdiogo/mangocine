@@ -31,9 +31,10 @@ export const FavoriteButton: React.FC<FavoriteButtonProps> = ({
   const { t } = useTranslation();
   const isFav = useAppSelector(selectIsFavorite(movie.id));
 
-  const handleToggle = (event: GestureResponderEvent) => {
-    // Prevent event bubbling to card onPress
-    event.stopPropagation();
+  const handleToggle = (event?: GestureResponderEvent) => {
+    // Prevent event bubbling to the card's onPress (guarded: synthetic events
+    // in some environments/tests may not implement stopPropagation).
+    event?.stopPropagation?.();
     dispatch(toggleFavorite(movie));
   };
 
