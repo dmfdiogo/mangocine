@@ -1,4 +1,4 @@
-# MangoCine
+<img src="docs/brand/mangocine-header.svg" alt="MangoCine — catálogo de filmes (TMDB) em React Native" width="600" />
 
 > Catálogo de filmes (TMDB) em **React Native CLI + TypeScript**, com arquitetura
 > modular, i18n (es-PY / pt-BR), testes abrangentes e foco em performance de
