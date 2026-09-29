@@ -1,0 +1,14 @@
+node_modules/
+vendor/
+ios/Pods/
+ios/build/
+android/build/
+android/.gradle/
+android/app/build/
+coverage/
+package-lock.json
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.webp
