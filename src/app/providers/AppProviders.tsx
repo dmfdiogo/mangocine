@@ -5,6 +5,8 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { NavigationContainer, DarkTheme } from '@react-navigation/native';
 import { store } from '@app/store';
 import { hydrateStore } from '@app/store/persistence';
+import { ErrorBoundary } from '@shared/components/feedback/ErrorBoundary';
+import { PerfOverlay } from '@shared/perf/PerfOverlay';
 import { colors } from '@shared/theme/colors';
 
 const navigationTheme = {
@@ -43,13 +45,16 @@ export const AppProviders: React.FC<AppProvidersProps> = ({ children }) => {
     <Provider store={store}>
       <SafeAreaProvider>
         <StatusBar barStyle="light-content" />
-        {hydrated ? (
-          <NavigationContainer theme={navigationTheme}>
-            {children}
-          </NavigationContainer>
-        ) : (
-          <View style={styles.splash} />
-        )}
+        <ErrorBoundary>
+          {hydrated ? (
+            <NavigationContainer theme={navigationTheme}>
+              {children}
+            </NavigationContainer>
+          ) : (
+            <View style={styles.splash} />
+          )}
+        </ErrorBoundary>
+        <PerfOverlay />
       </SafeAreaProvider>
     </Provider>
   );

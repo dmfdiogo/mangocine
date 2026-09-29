@@ -7,18 +7,18 @@ com grandes volumes de dados (sem travar a UI nem estourar memória).
 
 ### Lista (`FlatList`) — `MovieListScreen`
 
-| Configuração | Valor | Motivo |
-| :-- | :-- | :-- |
-| `numColumns` | `2` | Grade de catálogo |
-| `removeClippedSubviews` | `Platform.OS === 'android'` | Reduz memória no Android; desligado no iOS por bugs conhecidos de células em branco |
-| `maxToRenderPerBatch` | `8` | Menos trabalho de JS por lote |
-| `updateCellsBatchingPeriod` | `50ms` | Espalha o trabalho de render |
-| `windowSize` | `7` | Menos células montadas ao mesmo tempo (memória) |
-| `initialNumToRender` | `6` | Primeira tela rápida |
-| `keyboardDismissMode` | `on-drag` | Evita re-renders por teclado |
-| `keyboardShouldPersistTaps` | `handled` | Melhor UX na busca |
-| `React.memo` no `MovieCard` | — | Evita re-render ao paginar/digitar |
-| `handleEndReached` | guarda `isFetching/isLoading/isError/paginationError` | Evita paginação descontrolada |
+| Configuração                | Valor                                                 | Motivo                                                                              |
+| :-------------------------- | :---------------------------------------------------- | :---------------------------------------------------------------------------------- |
+| `numColumns`                | `2`                                                   | Grade de catálogo                                                                   |
+| `removeClippedSubviews`     | `Platform.OS === 'android'`                           | Reduz memória no Android; desligado no iOS por bugs conhecidos de células em branco |
+| `maxToRenderPerBatch`       | `8`                                                   | Menos trabalho de JS por lote                                                       |
+| `updateCellsBatchingPeriod` | `50ms`                                                | Espalha o trabalho de render                                                        |
+| `windowSize`                | `7`                                                   | Menos células montadas ao mesmo tempo (memória)                                     |
+| `initialNumToRender`        | `6`                                                   | Primeira tela rápida                                                                |
+| `keyboardDismissMode`       | `on-drag`                                             | Evita re-renders por teclado                                                        |
+| `keyboardShouldPersistTaps` | `handled`                                             | Melhor UX na busca                                                                  |
+| `React.memo` no `MovieCard` | —                                                     | Evita re-render ao paginar/digitar                                                  |
+| `handleEndReached`          | guarda `isFetching/isLoading/isError/paginationError` | Evita paginação descontrolada                                                       |
 
 ### Imagens
 
@@ -33,8 +33,8 @@ com grandes volumes de dados (sem travar a UI nem estourar memória).
 - **Header sticky fora do `FlatList`** (marca + busca fixas; filtros colapsáveis).
   Isso mantém o `getItemLayout` exato — o `ListMetricsAggregator` do RN **não**
   soma a altura do header, então header dentro da lista quebraria os offsets.
-- **Card de altura fixa** (`MOVIE_CARD_INFO_HEIGHT`) + wrapper determinístico →
-  `getItemLayout = row * rowHeight`.
+- **Card de altura fixa** (pôster 2:3 + borda, ver `MovieCard`) + wrapper
+  determinístico → `getItemLayout = row * rowHeight`.
 - **Prefetch sequencial de 5 páginas** no primeiro load (uma após a outra, para
   o append-merge não inverter a ordem) + `onEndReachedThreshold` alto.
 - Filtros colapsam no scroll (animação só no toggle; `onScroll` sem re-render
@@ -79,24 +79,66 @@ item), e sim:
   mais antigas) se o catálogo crescer para milhares de itens por sessão.
 - Migrar para cache de imagem com limite explícito (ver `adr/0001`).
 
-## 3. Como medir (para validar antes de otimizar mais)
+## 3. Medição in-app (dev-only)
+
+O app traz um monitor de frames em `src/shared/perf/` que roda **somente em
+`__DEV__`**:
+
+- `usePerfMonitor` amostra `requestAnimationFrame` em janelas de 1s
+  (`fps`, `avgFrameMs`, `worstFrameMs`, `droppedFrames`, `jankRate`).
+- `summarizeFrames` é uma função pura (testada em `__tests__/perf`) — a mesma
+  lógica que roda no dispositivo é a que os testes cobrem.
+- `PerfOverlay` monta um HUD no topo da tela: um _pill_ não-interativo com o FPS
+  atual (verde ≥55, âmbar ≥45, vermelho abaixo). Os detalhes (média/pior frame,
+  jank) ficam disponíveis via `usePerfMonitor`/`summarizeFrames` e nas
+  ferramentas nativas abaixo.
+
+Como usar: rode em dev, faça scroll contínuo no catálogo e observe quedas. O
+`worstFrameMs` denuncia _spikes_ (ex.: decodificação de imagem) que a média
+esconde.
+
+> Em produção o overlay não é renderizado (`if (!__DEV__) return null`) e o
+> monitor fica desabilitado — custo zero no bundle de release.
+
+## 4. Como medir (validação nativa)
+
+O monitor in-app mede o **frame pacing do JS**. Para memória e CPU reais use as
+ferramentas nativas, **sempre em build de release** (dev tem overhead de Metro
+e logging):
 
 ```bash
-# Perfil de JS/CPU
-npx react-native profile-hermes
-
-# FPS no Android (tempo real)
+# Android — FPS/framestats (jank por frame)
 adb shell dumpsys gfxinfo com.tmdbapp framestats
 
-# Memória no Android
+# Android — memória (heap Java/Native, bitmaps)
 adb shell dumpsys meminfo com.tmdbapp
+
+# Android — traço de sistema (perfetto) para jank + CPU
+adb shell perfetto -o /data/misc/perfetto-traces/trace -t 10s \
+  sched freq idle am wm gfx view binder_driver hal dalvik camera input res
+adb pull /data/misc/perfetto-traces/trace
+
+# Perfil de CPU do bundle Hermes
+npx react-native profile-hermes
 ```
 
-No iOS: **Xcode → Debug Navigator → Memory / CPU** e **Instruments (Time
-Profiler / Allocations)**.
+No iOS: **Xcode → Debug Navigator** (Memory/CPU), **Instruments → Time
+Profiler / Allocations / Core Animation**, e o **Frame Pacing** do simulador.
+
+No Android também vale o [Flashlight](https://github.com/bamlab/flashlight),
+que agrega FPS/RAM/CPU num score único para comparar builds.
+
+### Roteiro de teste (carga)
+
+1. Abrir o catálogo e rolar até o cap de páginas (`MAX_CATEGORY_PAGES`).
+2. Trocar de categoria e voltar (valida reset do cache/`scrollToOffset`).
+3. Buscar, limpar e buscar de novo (valida debounce + cache por termo).
+4. Alternar idioma (valida `resetApiState` sem vazar páginas).
+5. Repetir em release, anotando FPS mínimo e RSS pico.
 
 ### Metas
 
 - Scroll sustentando ~60fps (sem quedas < 55fps) em dispositivo de entrada.
+- `worstFrameMs` sem spikes recorrentes durante o scroll.
 - Sem crescimento monotônico de memória durante scroll contínuo.
 - Sem OOM mesmo percorrendo centenas de itens.

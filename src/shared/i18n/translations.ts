@@ -74,6 +74,7 @@ export const esPY = {
     'No encontramos películas que coincidan con tu búsqueda.',
   'feedback.emptyAction': 'Limpiar búsqueda',
   'feedback.loading': 'Cargando películas...',
+  'feedback.errorReset': 'Reintentar',
 
   'language.title': 'Idioma',
   'language.es': 'Español (Paraguay)',
@@ -164,6 +165,7 @@ const ptBR: Record<TranslationKey, string> = {
     'Não encontramos filmes que correspondam à sua busca.',
   'feedback.emptyAction': 'Limpar busca',
   'feedback.loading': 'Carregando filmes...',
+  'feedback.errorReset': 'Tentar novamente',
 
   'language.title': 'Idioma',
   'language.es': 'Espanhol (Paraguai)',
