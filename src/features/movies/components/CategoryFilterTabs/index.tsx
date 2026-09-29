@@ -1,26 +1,23 @@
-import React from 'react';
-import {
-  ScrollView,
-  TouchableOpacity,
-  StyleSheet,
-  ViewStyle,
-} from 'react-native';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { ScrollView, StyleSheet, ViewStyle } from 'react-native';
 import { AppText } from '@shared/components/ui/Text';
+import { PressableScale } from '@shared/components/ui/PressableScale';
 import { MovieCategory } from '@features/movies/api/types';
+import { useTranslation, TranslationKey } from '@shared/i18n';
 import { colors } from '@shared/theme/colors';
 import { spacing } from '@shared/theme/spacing';
+import { elevation, radius } from '@shared/theme/elevation';
 
 export interface CategoryOption {
   id: MovieCategory;
-  label: string;
-  icon: string;
+  labelKey: TranslationKey;
 }
 
 export const CATEGORIES: CategoryOption[] = [
-  { id: 'popular', label: 'Populares', icon: '🔥' },
-  { id: 'top_rated', label: 'Mejor Valoradas', icon: '⭐' },
-  { id: 'now_playing', label: 'En Cartelera', icon: '🎬' },
-  { id: 'upcoming', label: 'Próximamente', icon: '📅' },
+  { id: 'popular', labelKey: 'category.popular' },
+  { id: 'top_rated', labelKey: 'category.top_rated' },
+  { id: 'now_playing', labelKey: 'category.now_playing' },
+  { id: 'upcoming', labelKey: 'category.upcoming' },
 ];
 
 export interface CategoryFilterTabsProps {
@@ -29,25 +26,71 @@ export interface CategoryFilterTabsProps {
   style?: ViewStyle;
 }
 
+interface ChipLayout {
+  x: number;
+  width: number;
+}
+
 export const CategoryFilterTabs: React.FC<CategoryFilterTabsProps> = ({
   selectedCategory,
   onSelectCategory,
   style,
 }) => {
+  const { t } = useTranslation();
+  const scrollRef = useRef<React.ElementRef<typeof ScrollView>>(null);
+  const layouts = useRef<Partial<Record<MovieCategory, ChipLayout>>>({});
+  const contentWidth = useRef(0);
+  const [viewportWidth, setViewportWidth] = useState(0);
+
+  // Center the selected chip so a partially cut-off chip scrolls into view.
+  const scrollChipIntoView = useCallback(
+    (id: MovieCategory) => {
+      const layout = layouts.current[id];
+      if (!layout || viewportWidth === 0) {
+        return;
+      }
+      const centered = layout.x + layout.width / 2 - viewportWidth / 2;
+      const maxScroll = Math.max(0, contentWidth.current - viewportWidth);
+      const x = Math.min(Math.max(0, centered), maxScroll);
+      scrollRef.current?.scrollTo({ x, animated: true });
+    },
+    [viewportWidth],
+  );
+
+  useEffect(() => {
+    scrollChipIntoView(selectedCategory);
+  }, [selectedCategory, scrollChipIntoView]);
+
   return (
     <ScrollView
+      ref={scrollRef}
       horizontal
       showsHorizontalScrollIndicator={false}
+      onLayout={event => setViewportWidth(event.nativeEvent.layout.width)}
+      onContentSizeChange={width => {
+        contentWidth.current = width;
+      }}
       contentContainerStyle={[styles.container, style]}
     >
-      {CATEGORIES.map((cat) => {
+      {CATEGORIES.map(cat => {
         const isSelected = selectedCategory === cat.id;
 
         return (
-          <TouchableOpacity
+          <PressableScale
             key={cat.id}
-            onPress={() => onSelectCategory(cat.id)}
-            activeOpacity={0.7}
+            onPress={() => {
+              onSelectCategory(cat.id);
+              scrollChipIntoView(cat.id);
+            }}
+            onLayout={event => {
+              layouts.current[cat.id] = {
+                x: event.nativeEvent.layout.x,
+                width: event.nativeEvent.layout.width,
+              };
+            }}
+            accessibilityRole="button"
+            accessibilityState={{ selected: isSelected }}
+            hitSlop={{ top: 8, bottom: 8 }}
             style={[
               styles.tab,
               isSelected ? styles.tabSelected : styles.tabUnselected,
@@ -55,12 +98,12 @@ export const CategoryFilterTabs: React.FC<CategoryFilterTabsProps> = ({
           >
             <AppText
               variant="tag"
-              color={isSelected ? 'text' : 'textSecondary'}
+              color={isSelected ? 'onPrimary' : 'textSecondary'}
               style={styles.tabText}
             >
-              {cat.icon} {cat.label}
+              {t(cat.labelKey)}
             </AppText>
-          </TouchableOpacity>
+          </PressableScale>
         );
       })}
     </ScrollView>
@@ -75,23 +118,17 @@ const styles = StyleSheet.create({
   },
   tab: {
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs + 2,
-    borderRadius: 20,
+    paddingVertical: spacing.xs + 3,
+    borderRadius: radius.pill,
     alignItems: 'center',
     justifyContent: 'center',
   },
   tabSelected: {
     backgroundColor: colors.primary,
-    shadowColor: colors.primary,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.4,
-    shadowRadius: 4,
-    elevation: 3,
+    ...elevation.sm,
   },
   tabUnselected: {
-    backgroundColor: colors.surfaceElevated,
-    borderWidth: 1,
-    borderColor: colors.border,
+    backgroundColor: 'transparent',
   },
   tabText: {
     fontSize: 12,

@@ -2,6 +2,8 @@ import React from 'react';
 import { View, StyleSheet, ViewStyle } from 'react-native';
 import { AppText } from '@shared/components/ui/Text';
 import { Button } from '@shared/components/ui/Button';
+import { FilmIcon } from '@shared/components/ui/Icon';
+import { useTranslation } from '@shared/i18n';
 import { colors } from '@shared/theme/colors';
 import { spacing } from '@shared/theme/spacing';
 
@@ -15,32 +17,42 @@ export interface EmptyStateViewProps {
 }
 
 export const EmptyStateView: React.FC<EmptyStateViewProps> = ({
-  title = 'No hay resultados',
-  message = 'No encontramos películas que coincidan con tu búsqueda.',
+  title,
+  message,
   onAction,
-  actionTitle = 'Limpiar búsqueda',
+  actionTitle,
   style,
   fullScreen = true,
 }) => {
+  const { t } = useTranslation();
+
   return (
     <View style={[styles.container, fullScreen && styles.fullScreen, style]}>
       <View style={styles.iconCircle}>
-        <AppText variant="title" color="textMuted">
-          🎬
-        </AppText>
+        <FilmIcon size={34} />
       </View>
 
-      <AppText variant="subtitle" color="text" align="center" style={styles.title}>
-        {title}
+      <AppText
+        variant="subtitle"
+        color="text"
+        align="center"
+        style={styles.title}
+      >
+        {title ?? t('feedback.emptyTitle')}
       </AppText>
 
-      <AppText variant="body" color="textSecondary" align="center" style={styles.message}>
-        {message}
+      <AppText
+        variant="body"
+        color="textSecondary"
+        align="center"
+        style={styles.message}
+      >
+        {message ?? t('feedback.emptyMessage')}
       </AppText>
 
       {onAction && (
         <Button
-          title={actionTitle}
+          title={actionTitle ?? t('feedback.emptyAction')}
           variant="secondary"
           onPress={onAction}
           style={styles.button}
@@ -61,10 +73,12 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   iconCircle: {
-    width: 68,
-    height: 68,
-    borderRadius: 34,
+    width: 80,
+    height: 80,
+    borderRadius: 40,
     backgroundColor: colors.surfaceElevated,
+    borderWidth: 1,
+    borderColor: colors.border,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing.lg,
@@ -77,6 +91,6 @@ const styles = StyleSheet.create({
     maxWidth: 280,
   },
   button: {
-    minWidth: 160,
+    minWidth: 200,
   },
 });

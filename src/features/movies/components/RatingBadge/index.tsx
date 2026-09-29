@@ -1,8 +1,8 @@
 import React from 'react';
 import { View, StyleSheet, ViewStyle } from 'react-native';
 import { AppText } from '@shared/components/ui/Text';
-import { colors } from '@shared/theme/colors';
 import { spacing } from '@shared/theme/spacing';
+import { elevation, radius } from '@shared/theme/elevation';
 import { formatRating } from '@shared/utils/formatters';
 
 export interface RatingBadgeProps {
@@ -19,11 +19,25 @@ export const RatingBadge: React.FC<RatingBadgeProps> = ({
   const isSmall = size === 'small';
 
   return (
-    <View style={[styles.container, isSmall ? styles.containerSmall : styles.containerMedium, style]}>
-      <AppText variant={isSmall ? 'tag' : 'captionBold'} color="star" style={styles.star}>
+    <View
+      style={[
+        styles.container,
+        isSmall ? styles.containerSmall : styles.containerMedium,
+        style,
+      ]}
+    >
+      <AppText
+        variant={isSmall ? 'tag' : 'captionBold'}
+        color="star"
+        style={styles.star}
+      >
         ★
       </AppText>
-      <AppText variant={isSmall ? 'tag' : 'captionBold'} color="text">
+      <AppText
+        variant={isSmall ? 'tag' : 'captionBold'}
+        color="text"
+        style={styles.value}
+      >
         {formatRating(rating)}
       </AppText>
     </View>
@@ -35,9 +49,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: 'rgba(11, 14, 20, 0.85)',
-    borderRadius: 8,
+    borderRadius: radius.sm,
     borderWidth: 1,
-    borderColor: 'rgba(251, 191, 36, 0.4)',
+    borderColor: 'rgba(251, 191, 36, 0.45)',
+    ...elevation.sm,
   },
   containerSmall: {
     paddingHorizontal: spacing.xs + 2,
@@ -49,5 +64,8 @@ const styles = StyleSheet.create({
   },
   star: {
     marginRight: 3,
+  },
+  value: {
+    fontVariant: ['tabular-nums'],
   },
 });

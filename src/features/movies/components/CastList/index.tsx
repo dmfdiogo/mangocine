@@ -1,13 +1,10 @@
 import React from 'react';
-import {
-  View,
-  ScrollView,
-  Image,
-  StyleSheet,
-  ActivityIndicator,
-} from 'react-native';
+import { View, ScrollView, StyleSheet, ActivityIndicator } from 'react-native';
 import { AppText } from '@shared/components/ui/Text';
+import { AppImage } from '@shared/components/ui/AppImage';
+import { SectionLabel } from '@shared/components/ui/SectionLabel';
 import { useGetMovieCreditsQuery } from '@features/movies/api/moviesApi';
+import { useTranslation } from '@shared/i18n';
 import { colors } from '@shared/theme/colors';
 import { spacing } from '@shared/theme/spacing';
 import { getPosterUrl } from '@shared/utils/imageHelpers';
@@ -18,6 +15,7 @@ export interface CastListProps {
 
 export const CastList: React.FC<CastListProps> = ({ movieId }) => {
   const { data: credits, isLoading } = useGetMovieCreditsQuery(movieId);
+  const { t } = useTranslation();
 
   if (isLoading) {
     return (
@@ -35,34 +33,33 @@ export const CastList: React.FC<CastListProps> = ({ movieId }) => {
 
   return (
     <View style={styles.container}>
-      <AppText variant="captionBold" color="textMuted" style={styles.sectionLabel}>
-        REPARTO PRINCIPAL
-      </AppText>
+      <SectionLabel title={t('detail.castTitle')} />
 
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.scrollList}
       >
-        {topCast.map((actor) => {
+        {topCast.map(actor => {
           const profileUri = getPosterUrl(actor.profile_path, 'w185');
+          const actorName = actor.name?.trim() || t('detail.unknown');
+          const initial = actorName.charAt(0).toUpperCase() || '?';
 
           return (
             <View key={actor.id} style={styles.actorCard}>
               <View style={styles.avatarContainer}>
-                {profileUri ? (
-                  <Image
-                    source={{ uri: profileUri }}
-                    style={styles.avatarImage}
-                    resizeMode="cover"
-                  />
-                ) : (
-                  <View style={styles.avatarPlaceholder}>
-                    <AppText variant="captionBold" color="textMuted">
-                      {actor.name.charAt(0)}
-                    </AppText>
-                  </View>
-                )}
+                <AppImage
+                  uri={profileUri}
+                  style={styles.avatarImage}
+                  resizeMode="cover"
+                  fallback={
+                    <View style={styles.avatarPlaceholder}>
+                      <AppText variant="captionBold" color="textMuted">
+                        {initial}
+                      </AppText>
+                    </View>
+                  }
+                />
               </View>
 
               <AppText
@@ -72,18 +69,20 @@ export const CastList: React.FC<CastListProps> = ({ movieId }) => {
                 align="center"
                 style={styles.actorName}
               >
-                {actor.name}
+                {actorName}
               </AppText>
 
-              <AppText
-                variant="tag"
-                color="textMuted"
-                numberOfLines={1}
-                align="center"
-                style={styles.characterName}
-              >
-                {actor.character}
-              </AppText>
+              {actor.character ? (
+                <AppText
+                  variant="tag"
+                  color="textMuted"
+                  numberOfLines={1}
+                  align="center"
+                  style={styles.characterName}
+                >
+                  {actor.character}
+                </AppText>
+              ) : null}
             </View>
           );
         })}
@@ -100,10 +99,6 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.md,
     alignItems: 'center',
   },
-  sectionLabel: {
-    letterSpacing: 1,
-    marginBottom: spacing.sm,
-  },
   scrollList: {
     gap: spacing.md,
     paddingRight: spacing.lg,
@@ -113,12 +108,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   avatarContainer: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    width: 62,
+    height: 62,
+    borderRadius: 31,
     overflow: 'hidden',
     backgroundColor: colors.surfaceElevated,
-    borderWidth: 1.5,
+    borderWidth: 2,
     borderColor: colors.borderLight,
     marginBottom: spacing.xs,
   },

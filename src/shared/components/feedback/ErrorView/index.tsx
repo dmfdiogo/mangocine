@@ -2,6 +2,7 @@ import React from 'react';
 import { View, StyleSheet, ViewStyle } from 'react-native';
 import { AppText } from '@shared/components/ui/Text';
 import { Button } from '@shared/components/ui/Button';
+import { useTranslation } from '@shared/i18n';
 import { colors } from '@shared/theme/colors';
 import { spacing } from '@shared/theme/spacing';
 
@@ -14,12 +15,14 @@ export interface ErrorViewProps {
 }
 
 export const ErrorView: React.FC<ErrorViewProps> = ({
-  title = 'Ha ocurrido un error',
-  message = 'No pudimos cargar la información. Por favor, verifica tu conexión e inténtalo nuevamente.',
+  title,
+  message,
   onRetry,
   style,
   fullScreen = true,
 }) => {
+  const { t } = useTranslation();
+
   return (
     <View style={[styles.container, fullScreen && styles.fullScreen, style]}>
       <View style={styles.iconCircle}>
@@ -29,16 +32,21 @@ export const ErrorView: React.FC<ErrorViewProps> = ({
       </View>
 
       <AppText variant="title" color="text" align="center" style={styles.title}>
-        {title}
+        {title ?? t('feedback.errorTitle')}
       </AppText>
 
-      <AppText variant="body" color="textSecondary" align="center" style={styles.message}>
-        {message}
+      <AppText
+        variant="body"
+        color="textSecondary"
+        align="center"
+        style={styles.message}
+      >
+        {message ?? t('feedback.errorMessage')}
       </AppText>
 
       {onRetry && (
         <Button
-          title="Reintentar"
+          title={t('common.retry')}
           onPress={onRetry}
           style={styles.button}
         />
@@ -58,10 +66,12 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   iconCircle: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+    width: 80,
+    height: 80,
+    borderRadius: 40,
     backgroundColor: colors.errorBackground,
+    borderWidth: 1,
+    borderColor: 'rgba(239, 68, 68, 0.35)',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing.lg,
@@ -74,6 +84,6 @@ const styles = StyleSheet.create({
     maxWidth: 300,
   },
   button: {
-    minWidth: 160,
+    minWidth: 200,
   },
 });

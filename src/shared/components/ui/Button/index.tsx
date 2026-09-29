@@ -1,16 +1,17 @@
 import React from 'react';
 import {
-  TouchableOpacity,
   ActivityIndicator,
   StyleSheet,
   ViewStyle,
-  TouchableOpacityProps,
+  PressableProps,
 } from 'react-native';
 import { AppText } from '../Text';
+import { PressableScale } from '@shared/components/ui/PressableScale';
 import { colors, ColorType } from '@shared/theme/colors';
 import { spacing } from '@shared/theme/spacing';
+import { elevation, radius } from '@shared/theme/elevation';
 
-export interface ButtonProps extends TouchableOpacityProps {
+export interface ButtonProps extends PressableProps {
   title: string;
   variant?: 'primary' | 'secondary' | 'outline';
   loading?: boolean;
@@ -38,18 +39,20 @@ export const Button: React.FC<ButtonProps> = ({
         };
       case 'primary':
       default:
-        return { backgroundColor: colors.primary };
+        return {
+          backgroundColor: colors.primary,
+          ...elevation.md,
+        };
     }
   };
 
   const getTextColor = (): keyof ColorType => {
-    if (variant === 'outline') return 'text';
-    return 'text';
+    // Dark text on the (orange) primary; light text on darker surfaces.
+    return variant === 'primary' ? 'onPrimary' : 'text';
   };
 
   return (
-    <TouchableOpacity
-      activeOpacity={0.8}
+    <PressableScale
       onPress={onPress}
       disabled={disabled || loading}
       style={[
@@ -67,14 +70,14 @@ export const Button: React.FC<ButtonProps> = ({
           {title}
         </AppText>
       )}
-    </TouchableOpacity>
+    </PressableScale>
   );
 };
 
 const styles = StyleSheet.create({
   button: {
     height: 48,
-    borderRadius: 12,
+    borderRadius: radius.md,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: spacing.lg,

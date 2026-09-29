@@ -1,0 +1,11 @@
+appId: com.tmdbapp
+name: Troca de idioma es-PY → pt-BR
+---
+- launchApp:
+    clearState: true
+- tapOn: "Explorar catálogo"
+- tapOn:
+    id: "header-menu-button"
+- tapOn:
+    id: "language-option-pt-BR"
+- assertVisible: "Buscar filmes por título..."

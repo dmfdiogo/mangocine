@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   TextInput,
@@ -8,8 +8,11 @@ import {
   ViewStyle,
 } from 'react-native';
 import { AppText } from '@shared/components/ui/Text';
+import { SearchIcon } from '@shared/components/ui/Icon';
+import { useTranslation } from '@shared/i18n';
 import { colors } from '@shared/theme/colors';
 import { spacing } from '@shared/theme/spacing';
+import { radius } from '@shared/theme/elevation';
 
 export interface SearchBarProps {
   value: string;
@@ -24,10 +27,14 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   value,
   onChangeText,
   onClear,
-  placeholder = 'Buscar películas...',
+  placeholder,
   loading = false,
   style,
 }) => {
+  const { t } = useTranslation();
+  const resolvedPlaceholder = placeholder ?? t('search.placeholder');
+  const [isFocused, setIsFocused] = useState(false);
+
   const handleClear = () => {
     onChangeText('');
     if (onClear) {
@@ -36,20 +43,26 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   };
 
   return (
-    <View style={[styles.container, style]}>
-      <AppText variant="body" color="textMuted" style={styles.searchIcon}>
-        🔍
-      </AppText>
+    <View
+      style={[styles.container, isFocused && styles.containerFocused, style]}
+    >
+      <View style={styles.searchIcon} pointerEvents="none">
+        <SearchIcon size={18} />
+      </View>
 
       <TextInput
+        testID="search-input"
         style={styles.input}
         value={value}
         onChangeText={onChangeText}
-        placeholder={placeholder}
+        onFocus={() => setIsFocused(true)}
+        onBlur={() => setIsFocused(false)}
+        placeholder={resolvedPlaceholder}
         placeholderTextColor={colors.textMuted}
         returnKeyType="search"
         autoCapitalize="none"
         autoCorrect={false}
+        selectionColor={colors.primary}
       />
 
       {loading && (
@@ -60,7 +73,8 @@ export const SearchBar: React.FC<SearchBarProps> = ({
         />
       )}
 
-      {value.length > 0 && !loading && (
+      {/* Keep the clear button available while the debounce spinner is visible. */}
+      {value.length > 0 && (
         <TouchableOpacity
           onPress={handleClear}
           style={styles.clearButton}
@@ -68,7 +82,11 @@ export const SearchBar: React.FC<SearchBarProps> = ({
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
           <View style={styles.clearBadge}>
-            <AppText variant="caption" color="textSecondary" style={styles.clearText}>
+            <AppText
+              variant="caption"
+              color="textSecondary"
+              style={styles.clearText}
+            >
               ✕
             </AppText>
           </View>
@@ -83,15 +101,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: colors.surfaceElevated,
-    borderRadius: 14,
+    borderRadius: radius.md,
     paddingHorizontal: spacing.md,
-    height: 48,
+    height: 44,
     borderWidth: 1,
     borderColor: colors.border,
   },
+  containerFocused: {
+    borderColor: colors.primary,
+    backgroundColor: colors.surfaceHighlight,
+  },
   searchIcon: {
     marginRight: spacing.sm,
-    fontSize: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   input: {
     flex: 1,

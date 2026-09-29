@@ -58,4 +58,30 @@ describe('formatters utility', () => {
       expect(formatRuntime(undefined)).toBeNull();
     });
   });
+
+  describe('edge cases', () => {
+    it('formatRating returns N/A for NaN and negative values', () => {
+      expect(formatRating(NaN)).toBe('N/A');
+      expect(formatRating(-3.2)).toBe('N/A');
+    });
+
+    it('formatReleaseYear returns N/D for placeholder or malformed dates', () => {
+      expect(formatReleaseYear('0000-00-00')).toBe('N/D');
+      expect(formatReleaseYear('not-a-date')).toBe('N/D');
+      expect(formatReleaseYear(' 2024 ')).toBe('2024');
+      expect(formatReleaseYear('2024')).toBe('2024');
+    });
+
+    it('formatFullDate returns the raw value for impossible dates', () => {
+      expect(formatFullDate('2024-02-31', 'es-ES')).toBe('2024-02-31');
+      expect(formatFullDate('0000-00-00', 'es-ES')).toBe('0000-00-00');
+      expect(formatFullDate('99-99-99', 'es-ES')).toBe('99-99-99');
+    });
+
+    it('formatFullDate accepts real leap days', () => {
+      const result = formatFullDate('2024-02-29', 'es-ES');
+      expect(result).toContain('29');
+      expect(result).toContain('2024');
+    });
+  });
 });

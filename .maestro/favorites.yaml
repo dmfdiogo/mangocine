@@ -1,0 +1,14 @@
+appId: com.tmdbapp
+name: Favoritar e abrir a tela de favoritos
+---
+- launchApp:
+    clearState: true
+- tapOn: "Explorar catálogo"
+- tapOn:
+    id: "favorite-button"
+    index: 0
+- tapOn:
+    id: "header-menu-button"
+- tapOn:
+    id: "menu-favorites"
+- assertVisible: "Mis favoritos"

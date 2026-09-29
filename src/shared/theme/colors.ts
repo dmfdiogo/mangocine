@@ -4,9 +4,15 @@ export const colors = {
   surfaceElevated: '#1F242F',
   surfaceHighlight: '#2A313F',
 
-  primary: '#E50914',
-  primaryLight: '#FF3D47',
-  primaryDark: '#B20710',
+  // Primary is the mango orange (brand color, sampled from the illustration).
+  primary: '#F28E36',
+  primaryLight: '#F6A85A',
+  primaryDark: '#D9601F',
+  // Readable foreground on top of `primary` (white fails contrast on orange).
+  onPrimary: '#1A1207',
+
+  mango: '#F28E36',
+  mangoDark: '#EC5D33',
 
   secondary: '#38BDF8',
   accent: '#F59E0B',
@@ -14,7 +20,8 @@ export const colors = {
 
   text: '#F8FAFC',
   textSecondary: '#94A3B8',
-  textMuted: '#64748B',
+  // Bumped from #64748B to meet WCAG AA for small text on the dark background.
+  textMuted: '#8A97AC',
 
   border: '#272E3F',
   borderLight: '#3B4459',

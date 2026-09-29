@@ -1,19 +1,25 @@
-import React, { useState } from 'react';
-import {
-  View,
-  TouchableOpacity,
-  Image,
-  StyleSheet,
-  ActivityIndicator,
-} from 'react-native';
+import React, { useRef } from 'react';
+import { View, TouchableOpacity, StyleSheet, Animated } from 'react-native';
 import { AppText } from '@shared/components/ui/Text';
+import { AppImage } from '@shared/components/ui/AppImage';
+import { FilmIcon } from '@shared/components/ui/Icon';
 import { RatingBadge } from '../RatingBadge';
 import { FavoriteButton } from '../FavoriteButton';
 import { MovieDTO } from '@features/movies/api/types';
+import { useTranslation } from '@shared/i18n';
 import { colors } from '@shared/theme/colors';
 import { spacing } from '@shared/theme/spacing';
+import { elevation, radius } from '@shared/theme/elevation';
 import { getPosterUrl } from '@shared/utils/imageHelpers';
 import { formatReleaseYear } from '@shared/utils/formatters';
+
+export const MOVIE_CARD_BORDER_WIDTH = 1;
+
+/**
+ * Fixed geometry: the card is just the poster (2:3) plus its border, so the
+ * catalog `getItemLayout` stays exact.
+ */
+export const MOVIE_CARD_MAX_FONT_SCALE = 1.25;
 
 export interface MovieCardProps {
   movie: MovieDTO;
@@ -28,91 +34,98 @@ export const MovieCardComponent: React.FC<MovieCardProps> = ({
   onPressIn,
   width,
 }) => {
-  const [imageLoading, setImageLoading] = useState(true);
-  const [imageError, setImageError] = useState(false);
+  const { t } = useTranslation();
+  const scale = useRef(new Animated.Value(1)).current;
 
   const posterUri = getPosterUrl(movie.poster_path, 'w342');
-  const releaseYear = formatReleaseYear(movie.release_date);
+  const releaseYear = formatReleaseYear(movie.release_date, t('common.noYear'));
 
-  const handlePress = () => {
-    onPress(movie);
+  const animateScale = (toValue: number) => {
+    Animated.spring(scale, {
+      toValue,
+      useNativeDriver: true,
+      speed: 30,
+      bounciness: 4,
+    }).start();
   };
 
   const handlePressIn = () => {
+    animateScale(0.96);
     if (onPressIn) {
       onPressIn(movie);
     }
   };
 
+  const handlePressOut = () => {
+    animateScale(1);
+  };
+
+  const handlePress = () => {
+    onPress(movie);
+  };
+
   return (
-    <TouchableOpacity
-      activeOpacity={0.8}
-      onPress={handlePress}
-      onPressIn={handlePressIn}
-      style={[styles.card, width ? { width } : undefined]}
+    <Animated.View
+      style={[
+        styles.card,
+        width ? { width } : undefined,
+        { transform: [{ scale }] },
+      ]}
     >
-      <View style={styles.posterContainer}>
-        {posterUri && !imageError ? (
-          <>
-            <Image
-              source={{ uri: posterUri }}
-              style={styles.posterImage}
-              resizeMode="cover"
-              onLoadEnd={() => setImageLoading(false)}
-              onError={() => {
-                setImageLoading(false);
-                setImageError(true);
-              }}
-            />
-            {imageLoading && (
-              <View style={styles.loaderOverlay}>
-                <ActivityIndicator size="small" color={colors.primary} />
+      <TouchableOpacity
+        testID={`movie-card-${movie.id}`}
+        activeOpacity={0.85}
+        onPress={handlePress}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        accessibilityRole="button"
+        accessibilityLabel={movie.title}
+      >
+        <View style={styles.posterContainer}>
+          <AppImage
+            uri={posterUri}
+            style={styles.posterImage}
+            resizeMode="cover"
+            fallback={
+              <View style={styles.fallback}>
+                <FilmIcon size={34} />
               </View>
-            )}
-          </>
-        ) : (
-          <View style={styles.fallbackContainer}>
-            <AppText variant="title" color="textMuted">
-              🎬
-            </AppText>
+            }
+          />
+
+          {/* Favorite Button Overlay */}
+          <View style={styles.favoriteOverlay}>
+            <FavoriteButton movie={movie} size="small" />
+          </View>
+
+          {/* Rating Badge Overlay */}
+          <View style={styles.badgeOverlay}>
+            <RatingBadge rating={movie.vote_average} size="small" />
+          </View>
+
+          {/* Title / year overlaid on the poster */}
+          <View style={styles.infoOverlay}>
             <AppText
-              variant="tag"
-              color="textMuted"
-              align="center"
+              variant="captionBold"
+              color="text"
               numberOfLines={2}
-              style={styles.fallbackTitle}
+              maxFontSizeMultiplier={MOVIE_CARD_MAX_FONT_SCALE}
+              style={styles.title}
             >
               {movie.title}
             </AppText>
+            <AppText
+              variant="tag"
+              color="textSecondary"
+              maxFontSizeMultiplier={MOVIE_CARD_MAX_FONT_SCALE}
+              style={styles.year}
+            >
+              {releaseYear}
+            </AppText>
           </View>
-        )}
-
-        {/* Favorite Button Overlay */}
-        <View style={styles.favoriteOverlay}>
-          <FavoriteButton movie={movie} size="small" />
         </View>
-
-        {/* Rating Badge Overlay */}
-        <View style={styles.badgeOverlay}>
-          <RatingBadge rating={movie.vote_average} size="small" />
-        </View>
-      </View>
-
-      <View style={styles.infoContainer}>
-        <AppText
-          variant="captionBold"
-          color="text"
-          numberOfLines={2}
-          style={styles.title}
-        >
-          {movie.title}
-        </AppText>
-
-        <AppText variant="tag" color="textSecondary" style={styles.year}>
-          {releaseYear}
-        </AppText>
-      </View>
-    </TouchableOpacity>
+      </TouchableOpacity>
+    </Animated.View>
   );
 };
 
@@ -121,38 +134,26 @@ export const MovieCard = React.memo(MovieCardComponent);
 const styles = StyleSheet.create({
   card: {
     backgroundColor: colors.surface,
-    borderRadius: 12,
-    overflow: 'hidden',
-    borderWidth: 1,
+    borderRadius: radius.lg,
+    borderWidth: MOVIE_CARD_BORDER_WIDTH,
     borderColor: colors.border,
-    marginBottom: spacing.md,
+    ...elevation.lg,
   },
   posterContainer: {
     width: '100%',
     aspectRatio: 2 / 3,
     backgroundColor: colors.surfaceElevated,
-    position: 'relative',
+    borderRadius: radius.lg - 1,
     overflow: 'hidden',
   },
   posterImage: {
     width: '100%',
     height: '100%',
   },
-  loaderOverlay: {
+  fallback: {
     ...StyleSheet.absoluteFill,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.surfaceElevated,
-  },
-  fallbackContainer: {
-    ...StyleSheet.absoluteFill,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: spacing.sm,
-    backgroundColor: colors.surfaceElevated,
-  },
-  fallbackTitle: {
-    marginTop: spacing.xs,
   },
   favoriteOverlay: {
     position: 'absolute',
@@ -165,15 +166,21 @@ const styles = StyleSheet.create({
     top: spacing.sm,
     right: spacing.sm,
   },
-  infoContainer: {
-    padding: spacing.sm,
-    minHeight: 64,
-    justifyContent: 'space-between',
+  // A single caption container behind the title/year (no gradient bands).
+  infoOverlay: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    paddingHorizontal: spacing.sm + 2,
+    paddingVertical: spacing.sm,
+    backgroundColor: 'rgba(11, 14, 20, 0.78)',
   },
   title: {
-    lineHeight: 18,
+    lineHeight: 17,
   },
   year: {
-    marginTop: spacing.xs,
+    marginTop: 2,
+    fontVariant: ['tabular-nums'],
   },
 });

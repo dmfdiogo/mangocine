@@ -18,6 +18,12 @@ describe('imageHelpers utility', () => {
       expect(getPosterUrl(undefined)).toBeNull();
       expect(getPosterUrl('')).toBeNull();
     });
+
+    it('passes absolute URLs through untouched', () => {
+      expect(getPosterUrl('https://cdn.example.com/poster.jpg')).toBe(
+        'https://cdn.example.com/poster.jpg'
+      );
+    });
   });
 
   describe('getBackdropUrl', () => {
@@ -35,6 +41,12 @@ describe('imageHelpers utility', () => {
       expect(getBackdropUrl(null)).toBeNull();
       expect(getBackdropUrl(undefined)).toBeNull();
       expect(getBackdropUrl('')).toBeNull();
+    });
+
+    it('passes absolute URLs through untouched', () => {
+      expect(getBackdropUrl('http://cdn.example.com/backdrop.jpg')).toBe(
+        'http://cdn.example.com/backdrop.jpg'
+      );
     });
   });
 });

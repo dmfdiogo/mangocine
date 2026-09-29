@@ -1,11 +1,22 @@
 import React from 'react';
 import ReactTestRenderer from 'react-test-renderer';
+import { Provider } from 'react-redux';
+import { configureStore } from '@reduxjs/toolkit';
 import { RatingBadge } from '@features/movies/components/RatingBadge';
 import { Badge } from '@shared/components/ui/Badge';
 import { Button } from '@shared/components/ui/Button';
 import { ErrorView } from '@shared/components/feedback/ErrorView';
 import { EmptyStateView } from '@shared/components/feedback/EmptyStateView';
 import { CategoryFilterTabs } from '@features/movies/components/CategoryFilterTabs';
+import { Skeleton } from '@shared/components/ui/Skeleton';
+import { rootReducer } from '@app/store/rootReducer';
+
+const createTestStore = () =>
+  configureStore({
+    reducer: rootReducer,
+    middleware: (getDefaultMiddleware) =>
+      getDefaultMiddleware({ serializableCheck: false }),
+  });
 
 describe('UI & Feedback Components', () => {
   it('renders RatingBadge correctly with formatted score', () => {
@@ -46,7 +57,11 @@ describe('UI & Feedback Components', () => {
     const onRetry = jest.fn();
     let renderer: ReactTestRenderer.ReactTestRenderer | undefined;
     ReactTestRenderer.act(() => {
-      renderer = ReactTestRenderer.create(<ErrorView title="Algo salió mal" onRetry={onRetry} />);
+      renderer = ReactTestRenderer.create(
+        <Provider store={createTestStore()}>
+          <ErrorView title="Algo salió mal" onRetry={onRetry} />
+        </Provider>
+      );
     });
     expect(renderer).toBeDefined();
     ReactTestRenderer.act(() => {
@@ -59,11 +74,13 @@ describe('UI & Feedback Components', () => {
     let renderer: ReactTestRenderer.ReactTestRenderer | undefined;
     ReactTestRenderer.act(() => {
       renderer = ReactTestRenderer.create(
-        <EmptyStateView
-          title="Sin películas"
-          message="No se encontraron resultados"
-          onAction={onAction}
-        />
+        <Provider store={createTestStore()}>
+          <EmptyStateView
+            title="Sin películas"
+            message="No se encontraron resultados"
+            onAction={onAction}
+          />
+        </Provider>
       );
     });
     expect(renderer).toBeDefined();
@@ -77,10 +94,25 @@ describe('UI & Feedback Components', () => {
     let renderer: ReactTestRenderer.ReactTestRenderer | undefined;
     ReactTestRenderer.act(() => {
       renderer = ReactTestRenderer.create(
-        <CategoryFilterTabs
-          selectedCategory="popular"
-          onSelectCategory={onSelect}
-        />
+        <Provider store={createTestStore()}>
+          <CategoryFilterTabs
+            selectedCategory="popular"
+            onSelectCategory={onSelect}
+          />
+        </Provider>
+      );
+    });
+    expect(renderer).toBeDefined();
+    ReactTestRenderer.act(() => {
+      renderer?.unmount();
+    });
+  });
+
+  it('renders the pulsing Skeleton placeholder', () => {
+    let renderer: ReactTestRenderer.ReactTestRenderer | undefined;
+    ReactTestRenderer.act(() => {
+      renderer = ReactTestRenderer.create(
+        <Skeleton width="100%" height={120} borderRadius={8} />
       );
     });
     expect(renderer).toBeDefined();

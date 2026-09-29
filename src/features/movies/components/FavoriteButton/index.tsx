@@ -1,5 +1,10 @@
 import React from 'react';
-import { TouchableOpacity, StyleSheet, ViewStyle } from 'react-native';
+import {
+  TouchableOpacity,
+  StyleSheet,
+  ViewStyle,
+  GestureResponderEvent,
+} from 'react-native';
 import { useAppDispatch, useAppSelector } from '@app/store/hooks';
 import {
   toggleFavorite,
@@ -7,7 +12,9 @@ import {
 } from '@features/movies/store/favoritesSlice';
 import { MovieDTO } from '@features/movies/api/types';
 import { AppText } from '@shared/components/ui/Text';
-import { colors } from '@shared/theme/colors';
+import { useTranslation } from '@shared/i18n';
+import { spacing } from '@shared/theme/spacing';
+import { radius } from '@shared/theme/elevation';
 
 export interface FavoriteButtonProps {
   movie: MovieDTO;
@@ -21,13 +28,12 @@ export const FavoriteButton: React.FC<FavoriteButtonProps> = ({
   style,
 }) => {
   const dispatch = useAppDispatch();
+  const { t } = useTranslation();
   const isFav = useAppSelector(selectIsFavorite(movie.id));
 
-  const handleToggle = (e: any) => {
+  const handleToggle = (event: GestureResponderEvent) => {
     // Prevent event bubbling to card onPress
-    if (e?.stopPropagation) {
-      e.stopPropagation();
-    }
+    event.stopPropagation();
     dispatch(toggleFavorite(movie));
   };
 
@@ -35,22 +41,26 @@ export const FavoriteButton: React.FC<FavoriteButtonProps> = ({
 
   return (
     <TouchableOpacity
+      testID="favorite-button"
       activeOpacity={0.7}
       onPress={handleToggle}
       hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+      accessibilityRole="button"
+      accessibilityLabel={t('common.favorite')}
+      accessibilityState={{ selected: isFav }}
       style={[
         styles.button,
         isSmall ? styles.buttonSmall : styles.buttonMedium,
-        isFav && styles.buttonActive,
+        !isSmall && isFav && styles.buttonMediumActive,
         style,
       ]}
     >
       <AppText
         variant={isSmall ? 'tag' : 'body'}
         color={isFav ? 'primary' : 'text'}
-        style={styles.heartText}
+        style={isSmall ? styles.heartSmall : styles.heartMedium}
       >
-        {isFav ? '❤️' : '🤍'}
+        {isFav ? '♥' : '♡'}
       </AppText>
     </TouchableOpacity>
   );
@@ -60,25 +70,34 @@ const styles = StyleSheet.create({
   button: {
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(11, 14, 20, 0.8)',
-    borderWidth: 1,
-    borderColor: colors.borderLight,
   },
+  // Matches the rating chip (same height, radius and colors) on cards.
   buttonSmall: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    paddingHorizontal: spacing.xs + 2,
+    paddingVertical: 2,
+    borderRadius: radius.sm,
+    backgroundColor: 'rgba(11, 14, 20, 0.85)',
+    borderWidth: 1,
+    borderColor: 'rgba(251, 191, 36, 0.45)',
   },
   buttonMedium: {
     width: 44,
     height: 44,
     borderRadius: 22,
+    backgroundColor: 'rgba(11, 14, 20, 0.55)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.18)',
   },
-  buttonActive: {
-    borderColor: 'rgba(229, 9, 20, 0.5)',
-    backgroundColor: 'rgba(229, 9, 20, 0.15)',
+  buttonMediumActive: {
+    borderColor: 'rgba(242, 142, 54, 0.7)',
+    backgroundColor: 'rgba(242, 142, 54, 0.22)',
   },
-  heartText: {
-    fontSize: 14,
+  heartSmall: {
+    fontSize: 13,
+    lineHeight: 14,
+  },
+  heartMedium: {
+    fontSize: 22,
+    lineHeight: 24,
   },
 });

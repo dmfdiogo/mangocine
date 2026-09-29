@@ -1,7 +1,29 @@
-import { fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import {
+  fetchBaseQuery,
+  BaseQueryFn,
+  FetchArgs,
+  FetchBaseQueryError,
+} from '@reduxjs/toolkit/query/react';
 import { ENV } from '@app/config/env';
 
-export const tmdbBaseQuery = fetchBaseQuery({
+/**
+ * Resolves the TMDB content language from the current settings slice without
+ * importing the store type (avoids a runtime cycle with the API slice).
+ */
+const resolveContentLanguage = (state: unknown): string | null => {
+  const language = (state as { settings?: { language?: string } })?.settings
+    ?.language;
+  switch (language) {
+    case 'pt-BR':
+      return 'pt-BR';
+    case 'es-PY':
+      return 'es-ES';
+    default:
+      return null;
+  }
+};
+
+const rawBaseQuery = fetchBaseQuery({
   baseUrl: ENV.TMDB_BASE_URL,
   prepareHeaders: (headers) => {
     headers.set('Accept', 'application/json');
@@ -10,27 +32,29 @@ export const tmdbBaseQuery = fetchBaseQuery({
     }
     return headers;
   },
-  paramsSerializer: (params) => {
-    const searchParams = new URLSearchParams();
-    
-    // Always include api_key if bearer token is not present or as fallback
-    if (ENV.TMDB_API_KEY && !params?.api_key) {
-      searchParams.append('api_key', ENV.TMDB_API_KEY);
-    }
-    
-    // Include default language if not specified
-    if (!params?.language) {
-      searchParams.append('language', ENV.DEFAULT_LANGUAGE);
-    }
-
-    if (params) {
-      Object.entries(params).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
-          searchParams.append(key, String(value));
-        }
-      });
-    }
-
-    return searchParams.toString();
-  },
 });
+
+export const tmdbBaseQuery: BaseQueryFn<
+  string | FetchArgs,
+  unknown,
+  FetchBaseQueryError
+> = async (args, api, extraOptions) => {
+  const adjustedArgs: FetchArgs =
+    typeof args === 'string' ? { url: args } : { ...args };
+
+  const existingParams = (adjustedArgs.params as Record<string, unknown>) || {};
+  const contentLanguage =
+    resolveContentLanguage(api.getState()) || ENV.DEFAULT_LANGUAGE;
+
+  adjustedArgs.params = {
+    ...(ENV.TMDB_API_KEY && !existingParams.api_key
+      ? { api_key: ENV.TMDB_API_KEY }
+      : {}),
+    ...(contentLanguage && !existingParams.language
+      ? { language: contentLanguage }
+      : {}),
+    ...existingParams,
+  };
+
+  return rawBaseQuery(adjustedArgs, api, extraOptions);
+};

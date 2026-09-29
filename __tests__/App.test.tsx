@@ -12,12 +12,14 @@ describe('App Component', () => {
     jest.useRealTimers();
   });
 
-  it('renders without crashing', () => {
+  it('renders without crashing after rehydrating persisted state', async () => {
     let renderer: ReactTestRenderer.ReactTestRenderer | undefined;
-    ReactTestRenderer.act(() => {
+
+    await ReactTestRenderer.act(async () => {
       renderer = ReactTestRenderer.create(<App />);
       jest.advanceTimersByTime(500);
     });
+
     expect(renderer).toBeDefined();
 
     ReactTestRenderer.act(() => {

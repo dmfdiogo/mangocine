@@ -39,11 +39,24 @@ export const favoritesSlice = createSlice({
       state.byId = {};
       state.allIds = [];
     },
+    hydrateFavorites: (state, action: PayloadAction<FavoritesState>) => {
+      const payload = action.payload;
+      if (payload && payload.byId && Array.isArray(payload.allIds)) {
+        state.byId = payload.byId;
+        // Drop ids without a matching entity so selectors never yield
+        // `undefined` items (would crash list rendering).
+        state.allIds = payload.allIds.filter((id) => Boolean(payload.byId[id]));
+      }
+    },
   },
 });
 
-export const { toggleFavorite, removeFavorite, clearFavorites } =
-  favoritesSlice.actions;
+export const {
+  toggleFavorite,
+  removeFavorite,
+  clearFavorites,
+  hydrateFavorites,
+} = favoritesSlice.actions;
 
 // Base selector
 export const selectFavoritesState = (state: RootState): FavoritesState =>

@@ -71,6 +71,9 @@ yarn-error.log
 .env*.local
 !.env.example
 
+# opencode (local tooling)
+.opencode/
+
 # Yarn
 .yarn/*
 !.yarn/patches

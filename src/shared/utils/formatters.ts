@@ -1,22 +1,45 @@
 export const formatRating = (voteAverage: number | null | undefined): string => {
-  if (voteAverage === undefined || voteAverage === null || voteAverage === 0) {
+  if (voteAverage === undefined || voteAverage === null) {
     return 'N/A';
   }
-  return voteAverage.toFixed(1);
+  const numeric = Number(voteAverage);
+  if (!Number.isFinite(numeric) || numeric <= 0) {
+    return 'N/A';
+  }
+  return numeric.toFixed(1);
 };
 
-export const formatReleaseYear = (dateString?: string | null): string => {
-  if (!dateString) return 'N/D';
-  const year = dateString.split('-')[0];
-  return year || 'N/D';
+export const formatReleaseYear = (
+  dateString?: string | null,
+  fallback = 'N/D'
+): string => {
+  if (!dateString) return fallback;
+  const match = /^(\d{4})(?:-\d{2}-\d{2})?$/.exec(dateString.trim());
+  if (!match || match[1] === '0000') return fallback;
+  return match[1];
 };
 
-export const formatFullDate = (dateString?: string | null, locale = 'es-ES'): string => {
-  if (!dateString) return 'Fecha no disponible';
+export const formatFullDate = (
+  dateString?: string | null,
+  locale = 'es-ES',
+  fallback = 'Fecha no disponible'
+): string => {
+  if (!dateString) return fallback;
+  const parts = dateString.split('-').map(Number);
+  if (parts.length !== 3) return dateString;
+
+  const [year, month, day] = parts;
+  if (!year || !month || !day) return dateString;
+
   try {
-    const [year, month, day] = dateString.split('-').map(Number);
-    if (!year || !month || !day) return dateString;
     const date = new Date(year, month - 1, day);
+    const isRealDate =
+      !Number.isNaN(date.getTime()) &&
+      date.getFullYear() === year &&
+      date.getMonth() === month - 1 &&
+      date.getDate() === day;
+    if (!isRealDate) return dateString;
+
     return date.toLocaleDateString(locale, {
       day: 'numeric',
       month: 'long',

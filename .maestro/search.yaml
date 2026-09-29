@@ -1,0 +1,13 @@
+appId: com.tmdbapp
+name: Busca com debounce
+---
+- launchApp:
+    clearState: true
+- tapOn: "Explorar catálogo"
+- tapOn:
+    id: "search-input"
+- inputText: "dune"
+- extendedWaitUntil:
+    visible: "Resultados para"
+    timeout: 10000
+- assertVisible: "Resultados para"

@@ -3,6 +3,7 @@ import {
   toggleFavorite,
   removeFavorite,
   clearFavorites,
+  hydrateFavorites,
   selectAllFavorites,
   selectFavoritesCount,
   selectIsFavorite,
@@ -78,6 +79,19 @@ describe('favoritesSlice', () => {
     const nextState = favoritesSlice.reducer(populatedState, clearFavorites());
     expect(nextState.byId).toEqual({});
     expect(nextState.allIds).toEqual([]);
+  });
+
+  it('hydrateFavorites drops allIds without a matching entity', () => {
+    const nextState = favoritesSlice.reducer(
+      emptyState,
+      hydrateFavorites({
+        byId: { 101: mockMovie },
+        allIds: [101, 999],
+      })
+    );
+
+    expect(nextState.byId[101]).toEqual(mockMovie);
+    expect(nextState.allIds).toEqual([101]);
   });
 
   describe('memoized selectors', () => {

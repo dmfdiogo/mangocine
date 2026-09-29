@@ -3,6 +3,7 @@ import { View, StyleSheet, ViewStyle } from 'react-native';
 import { AppText } from '../Text';
 import { colors } from '@shared/theme/colors';
 import { spacing } from '@shared/theme/spacing';
+import { radius } from '@shared/theme/elevation';
 
 export interface BadgeProps {
   label: string;
@@ -24,19 +25,31 @@ export const Badge: React.FC<BadgeProps> = ({
       case 'secondary':
         return { backgroundColor: colors.secondary };
       case 'rating':
-        return { backgroundColor: 'rgba(245, 158, 11, 0.2)', borderWidth: 1, borderColor: colors.star };
+        return {
+          backgroundColor: 'rgba(245, 158, 11, 0.2)',
+          borderWidth: 1,
+          borderColor: colors.star,
+        };
       case 'outline':
-        return { backgroundColor: 'transparent', borderWidth: 1, borderColor: colors.borderLight };
+        return {
+          backgroundColor: 'transparent',
+          borderWidth: 1,
+          borderColor: colors.borderLight,
+        };
       case 'surface':
       default:
-        return { backgroundColor: colors.surfaceElevated };
+        return {
+          backgroundColor: colors.surfaceElevated,
+          borderWidth: 1,
+          borderColor: colors.border,
+        };
     }
   };
 
   const getTextColor = () => {
     switch (variant) {
       case 'primary':
-        return 'text';
+        return 'onPrimary';
       case 'rating':
         return 'star';
       case 'secondary':
@@ -60,9 +73,9 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs,
-    borderRadius: 6,
+    paddingHorizontal: spacing.sm + 2,
+    paddingVertical: spacing.xs + 1,
+    borderRadius: radius.sm,
     alignSelf: 'flex-start',
   },
   iconContainer: {

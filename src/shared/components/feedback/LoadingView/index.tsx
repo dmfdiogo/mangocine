@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, ActivityIndicator, StyleSheet, ViewStyle } from 'react-native';
 import { AppText } from '@shared/components/ui/Text';
+import { useTranslation } from '@shared/i18n';
 import { colors } from '@shared/theme/colors';
 import { spacing } from '@shared/theme/spacing';
 
@@ -11,16 +12,19 @@ export interface LoadingViewProps {
 }
 
 export const LoadingView: React.FC<LoadingViewProps> = ({
-  message = 'Cargando películas...',
+  message,
   style,
   fullScreen = true,
 }) => {
+  const { t } = useTranslation();
+  const resolvedMessage = message ?? t('feedback.loading');
+
   return (
     <View style={[styles.container, fullScreen && styles.fullScreen, style]}>
       <ActivityIndicator size="large" color={colors.primary} />
-      {!!message && (
+      {!!resolvedMessage && (
         <AppText variant="caption" color="textSecondary" style={styles.message}>
-          {message}
+          {resolvedMessage}
         </AppText>
       )}
     </View>

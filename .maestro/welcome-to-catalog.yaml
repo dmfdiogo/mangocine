@@ -1,0 +1,12 @@
+appId: com.tmdbapp
+name: Welcome → catálogo
+---
+- launchApp:
+    clearState: true
+- assertVisible: "MangoCine"
+- assertVisible: "Explorar catálogo"
+- tapOn: "Explorar catálogo"
+- assertVisible:
+    id: "search-input"
+- assertVisible:
+    id: "header-menu-button"

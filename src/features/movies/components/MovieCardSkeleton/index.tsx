@@ -1,13 +1,21 @@
 import React, { useEffect, useRef } from 'react';
 import { View, StyleSheet, Animated } from 'react-native';
+import { MOVIE_CARD_BORDER_WIDTH } from '../MovieCard';
 import { colors } from '@shared/theme/colors';
 import { spacing } from '@shared/theme/spacing';
+import { radius } from '@shared/theme/elevation';
 
 export interface MovieCardSkeletonProps {
   width?: number;
 }
 
-export const MovieCardSkeleton: React.FC<MovieCardSkeletonProps> = ({ width }) => {
+/**
+ * Mirrors the editorial `MovieCard` (poster + overlaid lines) so the loading
+ * grid doesn't jump when real cards mount.
+ */
+export const MovieCardSkeleton: React.FC<MovieCardSkeletonProps> = ({
+  width,
+}) => {
   const pulseAnim = useRef(new Animated.Value(0.4)).current;
 
   useEffect(() => {
@@ -23,7 +31,7 @@ export const MovieCardSkeleton: React.FC<MovieCardSkeletonProps> = ({ width }) =
           duration: 800,
           useNativeDriver: true,
         }),
-      ])
+      ]),
     );
     animation.start();
 
@@ -34,10 +42,8 @@ export const MovieCardSkeleton: React.FC<MovieCardSkeletonProps> = ({ width }) =
 
   return (
     <View style={[styles.card, width ? { width } : undefined]}>
-      <Animated.View style={[styles.posterSkeleton, { opacity: pulseAnim }]} />
-      <View style={styles.infoSkeleton}>
-        <Animated.View style={[styles.titleLine1, { opacity: pulseAnim }]} />
-        <Animated.View style={[styles.titleLine2, { opacity: pulseAnim }]} />
+      <View style={styles.poster}>
+        <Animated.View style={[styles.titleLine, { opacity: pulseAnim }]} />
         <Animated.View style={[styles.yearLine, { opacity: pulseAnim }]} />
       </View>
     </View>
@@ -47,39 +53,30 @@ export const MovieCardSkeleton: React.FC<MovieCardSkeletonProps> = ({ width }) =
 const styles = StyleSheet.create({
   card: {
     backgroundColor: colors.surface,
-    borderRadius: 12,
-    overflow: 'hidden',
-    borderWidth: 1,
+    borderRadius: radius.lg,
+    borderWidth: MOVIE_CARD_BORDER_WIDTH,
     borderColor: colors.border,
-    marginBottom: spacing.md,
+    overflow: 'hidden',
   },
-  posterSkeleton: {
+  poster: {
     width: '100%',
     aspectRatio: 2 / 3,
     backgroundColor: colors.surfaceElevated,
-  },
-  infoSkeleton: {
+    justifyContent: 'flex-end',
     padding: spacing.sm,
-    minHeight: 64,
+    overflow: 'hidden',
   },
-  titleLine1: {
-    height: 12,
+  titleLine: {
+    height: 11,
     width: '85%',
+    borderRadius: radius.xs,
     backgroundColor: colors.surfaceHighlight,
-    borderRadius: 4,
     marginBottom: 6,
   },
-  titleLine2: {
-    height: 12,
-    width: '60%',
-    backgroundColor: colors.surfaceHighlight,
-    borderRadius: 4,
-    marginBottom: 8,
-  },
   yearLine: {
-    height: 10,
-    width: '35%',
+    height: 9,
+    width: '40%',
+    borderRadius: radius.xs,
     backgroundColor: colors.surfaceHighlight,
-    borderRadius: 4,
   },
 });
