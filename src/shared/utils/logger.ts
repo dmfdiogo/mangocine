@@ -91,7 +91,9 @@ export class Logger {
 
   constructor(config: LoggerConfig = {}) {
     this.minLevel = config.minLevel ?? (__DEV__ ? 'debug' : 'warn');
-    this.transports = config.transports ?? [consoleTransport];
+    // Console output is a dev-only convenience; in production no transport is
+    // attached unless a crash reporter is configured explicitly.
+    this.transports = config.transports ?? (__DEV__ ? [consoleTransport] : []);
     this.enabled = config.enabled ?? true;
   }
 
