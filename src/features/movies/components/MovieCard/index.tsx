@@ -93,17 +93,7 @@ export const MovieCardComponent: React.FC<MovieCardProps> = ({
             }
           />
 
-          {/* Favorite Button Overlay */}
-          <View style={styles.favoriteOverlay}>
-            <FavoriteButton movie={movie} size="small" />
-          </View>
-
-          {/* Rating Badge Overlay */}
-          <View style={styles.badgeOverlay}>
-            <RatingBadge rating={movie.vote_average} size="small" />
-          </View>
-
-          {/* Title / year overlaid on the poster */}
+          {/* Title / year + rating/favorite footer overlaid on the poster */}
           <View style={styles.infoOverlay}>
             <AppText
               variant="captionBold"
@@ -122,6 +112,13 @@ export const MovieCardComponent: React.FC<MovieCardProps> = ({
             >
               {releaseYear}
             </AppText>
+
+            {/* Rating on the left, favorite on the right (where the "4K" chip
+                sits in the reference card). */}
+            <View style={styles.footerRow}>
+              <RatingBadge rating={movie.vote_average} size="small" />
+              <FavoriteButton movie={movie} size="small" />
+            </View>
           </View>
         </View>
       </TouchableOpacity>
@@ -155,17 +152,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  favoriteOverlay: {
-    position: 'absolute',
-    top: spacing.sm,
-    left: spacing.sm,
-    zIndex: 2,
-  },
-  badgeOverlay: {
-    position: 'absolute',
-    top: spacing.sm,
-    right: spacing.sm,
-  },
   // A single caption container behind the title/year (no gradient bands).
   infoOverlay: {
     position: 'absolute',
@@ -182,5 +168,11 @@ const styles = StyleSheet.create({
   year: {
     marginTop: 2,
     fontVariant: ['tabular-nums'],
+  },
+  footerRow: {
+    marginTop: spacing.xs + 2,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
 });
