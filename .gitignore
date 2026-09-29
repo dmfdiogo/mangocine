@@ -69,7 +69,6 @@ yarn-error.log
 # Environment
 .env
 .env*.local
-!.env.example
 
 # opencode (local tooling)
 .opencode/

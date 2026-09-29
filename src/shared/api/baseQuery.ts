@@ -25,11 +25,8 @@ const resolveContentLanguage = (state: unknown): string | null => {
 
 const rawBaseQuery = fetchBaseQuery({
   baseUrl: ENV.TMDB_BASE_URL,
-  prepareHeaders: (headers) => {
+  prepareHeaders: headers => {
     headers.set('Accept', 'application/json');
-    if (ENV.TMDB_BEARER_TOKEN) {
-      headers.set('Authorization', `Bearer ${ENV.TMDB_BEARER_TOKEN}`);
-    }
     return headers;
   },
 });
