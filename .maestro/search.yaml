@@ -3,11 +3,11 @@ name: Busca com debounce
 ---
 - launchApp:
     clearState: true
-- tapOn: "Explorar catálogo"
+- tapOn: 'Explorar catálogo'
 - tapOn:
-    id: "search-input"
-- inputText: "dune"
+    id: 'search-input'
+- inputText: 'dune'
 - extendedWaitUntil:
-    visible: "Resultados para"
+    visible: 'Resultados para.*'
     timeout: 10000
-- assertVisible: "Resultados para"
+- assertVisible: 'Resultados para.*'
