@@ -1,4 +1,5 @@
 import React from 'react';
+import { Text } from 'react-native';
 import ReactTestRenderer from 'react-test-renderer';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
@@ -14,7 +15,7 @@ import { rootReducer } from '@app/store/rootReducer';
 const createTestStore = () =>
   configureStore({
     reducer: rootReducer,
-    middleware: (getDefaultMiddleware) =>
+    middleware: getDefaultMiddleware =>
       getDefaultMiddleware({ serializableCheck: false }),
   });
 
@@ -33,7 +34,9 @@ describe('UI & Feedback Components', () => {
   it('renders Genre Badge correctly', () => {
     let renderer: ReactTestRenderer.ReactTestRenderer | undefined;
     ReactTestRenderer.act(() => {
-      renderer = ReactTestRenderer.create(<Badge label="Acción" variant="surface" />);
+      renderer = ReactTestRenderer.create(
+        <Badge label="Acción" variant="surface" />,
+      );
     });
     expect(renderer).toBeDefined();
     ReactTestRenderer.act(() => {
@@ -41,11 +44,38 @@ describe('UI & Feedback Components', () => {
     });
   });
 
+  it('renders Badge in every variant, with and without an icon', () => {
+    (['primary', 'secondary', 'rating', 'outline', 'surface'] as const).forEach(
+      variant => {
+        let renderer: ReactTestRenderer.ReactTestRenderer | undefined;
+        ReactTestRenderer.act(() => {
+          renderer = ReactTestRenderer.create(
+            <Badge
+              label={`badge-${variant}`}
+              variant={variant}
+              icon={<Text>★</Text>}
+            />,
+          );
+        });
+        expect(
+          renderer!.root
+            .findAllByType(Text)
+            .some(node => node.props.children === `badge-${variant}`),
+        ).toBe(true);
+        ReactTestRenderer.act(() => {
+          renderer?.unmount();
+        });
+      },
+    );
+  });
+
   it('renders Button with title', () => {
     const onPress = jest.fn();
     let renderer: ReactTestRenderer.ReactTestRenderer | undefined;
     ReactTestRenderer.act(() => {
-      renderer = ReactTestRenderer.create(<Button title="Click Me" onPress={onPress} />);
+      renderer = ReactTestRenderer.create(
+        <Button title="Click Me" onPress={onPress} />,
+      );
     });
     expect(renderer).toBeDefined();
     ReactTestRenderer.act(() => {
@@ -60,7 +90,7 @@ describe('UI & Feedback Components', () => {
       renderer = ReactTestRenderer.create(
         <Provider store={createTestStore()}>
           <ErrorView title="Algo salió mal" onRetry={onRetry} />
-        </Provider>
+        </Provider>,
       );
     });
     expect(renderer).toBeDefined();
@@ -80,7 +110,7 @@ describe('UI & Feedback Components', () => {
             message="No se encontraron resultados"
             onAction={onAction}
           />
-        </Provider>
+        </Provider>,
       );
     });
     expect(renderer).toBeDefined();
@@ -99,7 +129,7 @@ describe('UI & Feedback Components', () => {
             selectedCategory="popular"
             onSelectCategory={onSelect}
           />
-        </Provider>
+        </Provider>,
       );
     });
     expect(renderer).toBeDefined();
@@ -112,7 +142,7 @@ describe('UI & Feedback Components', () => {
     let renderer: ReactTestRenderer.ReactTestRenderer | undefined;
     ReactTestRenderer.act(() => {
       renderer = ReactTestRenderer.create(
-        <Skeleton width="100%" height={120} borderRadius={8} />
+        <Skeleton width="100%" height={120} borderRadius={8} />,
       );
     });
     expect(renderer).toBeDefined();

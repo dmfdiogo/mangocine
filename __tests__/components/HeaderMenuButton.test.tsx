@@ -8,17 +8,18 @@ import { rootReducer } from '@app/store/rootReducer';
 const createTestStore = () =>
   configureStore({
     reducer: rootReducer,
-    middleware: (getDefaultMiddleware) =>
+    middleware: getDefaultMiddleware =>
       getDefaultMiddleware({ serializableCheck: false }),
   });
 
 const pressableByTestId = (
   renderer: ReactTestRenderer.ReactTestRenderer,
-  testID: string
+  testID: string,
 ) =>
   renderer.root.findAll(
-    (node) =>
-      node.props?.testID === testID && typeof node.props?.onPress === 'function'
+    node =>
+      node.props?.testID === testID &&
+      typeof node.props?.onPress === 'function',
   )[0];
 
 describe('HeaderMenuButton', () => {
@@ -30,7 +31,7 @@ describe('HeaderMenuButton', () => {
       renderer = ReactTestRenderer.create(
         <Provider store={store}>
           <HeaderMenuButton />
-        </Provider>
+        </Provider>,
       );
     });
 
@@ -51,6 +52,40 @@ describe('HeaderMenuButton', () => {
     });
   });
 
+  it('navigates to catalog and favorites from the menu rows', () => {
+    const onNavigateCatalog = jest.fn();
+    const onNavigateFavorites = jest.fn();
+    let renderer: ReactTestRenderer.ReactTestRenderer | undefined;
+
+    ReactTestRenderer.act(() => {
+      renderer = ReactTestRenderer.create(
+        <Provider store={createTestStore()}>
+          <HeaderMenuButton
+            onNavigateCatalog={onNavigateCatalog}
+            onNavigateFavorites={onNavigateFavorites}
+          />
+        </Provider>,
+      );
+    });
+
+    ReactTestRenderer.act(() => {
+      pressableByTestId(renderer!, 'header-menu-button').props.onPress();
+    });
+    ReactTestRenderer.act(() => {
+      pressableByTestId(renderer!, 'menu-catalog').props.onPress();
+    });
+    ReactTestRenderer.act(() => {
+      pressableByTestId(renderer!, 'menu-favorites').props.onPress();
+    });
+
+    expect(onNavigateCatalog).toHaveBeenCalledTimes(1);
+    expect(onNavigateFavorites).toHaveBeenCalledTimes(1);
+
+    ReactTestRenderer.act(() => {
+      renderer?.unmount();
+    });
+  });
+
   it('renders the trigger without an open menu', () => {
     const store = createTestStore();
     let renderer: ReactTestRenderer.ReactTestRenderer | undefined;
@@ -58,16 +93,16 @@ describe('HeaderMenuButton', () => {
       renderer = ReactTestRenderer.create(
         <Provider store={store}>
           <HeaderMenuButton />
-        </Provider>
+        </Provider>,
       );
     });
 
     expect(
       renderer!.root.findAll(
-        (node) =>
+        node =>
           node.props?.testID === 'header-menu-button' &&
-          typeof node.props?.onPress === 'function'
-      ).length
+          typeof node.props?.onPress === 'function',
+      ).length,
     ).toBeGreaterThan(0);
 
     ReactTestRenderer.act(() => {
