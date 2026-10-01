@@ -105,7 +105,7 @@ const styles = StyleSheet.create({
     width: 360,
     height: 360,
     borderRadius: 180,
-    backgroundColor: 'rgba(242, 142, 54, 0.16)',
+    backgroundColor: colors.primarySurfaceSoft,
   },
   decorBottom: {
     position: 'absolute',
@@ -114,7 +114,7 @@ const styles = StyleSheet.create({
     width: 400,
     height: 400,
     borderRadius: 200,
-    backgroundColor: 'rgba(56, 189, 248, 0.1)',
+    backgroundColor: colors.secondarySurface,
   },
   content: {
     flex: 1,

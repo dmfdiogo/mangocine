@@ -45,7 +45,10 @@ describe('favoritesSlice', () => {
   };
 
   it('adds a movie to favorites on first toggle', () => {
-    const nextState = favoritesSlice.reducer(emptyState, toggleFavorite(mockMovie));
+    const nextState = favoritesSlice.reducer(
+      emptyState,
+      toggleFavorite(mockMovie),
+    );
     expect(nextState.byId[101]).toEqual(mockMovie);
     expect(nextState.allIds).toEqual([101]);
   });
@@ -55,7 +58,10 @@ describe('favoritesSlice', () => {
       byId: { 101: mockMovie },
       allIds: [101],
     };
-    const nextState = favoritesSlice.reducer(populatedState, toggleFavorite(mockMovie));
+    const nextState = favoritesSlice.reducer(
+      populatedState,
+      toggleFavorite(mockMovie),
+    );
     expect(nextState.byId[101]).toBeUndefined();
     expect(nextState.allIds).toEqual([]);
   });
@@ -65,7 +71,10 @@ describe('favoritesSlice', () => {
       byId: { 101: mockMovie, 102: mockMovie2 },
       allIds: [102, 101],
     };
-    const nextState = favoritesSlice.reducer(populatedState, removeFavorite(101));
+    const nextState = favoritesSlice.reducer(
+      populatedState,
+      removeFavorite(101),
+    );
     expect(nextState.byId[101]).toBeUndefined();
     expect(nextState.byId[102]).toEqual(mockMovie2);
     expect(nextState.allIds).toEqual([102]);
@@ -87,7 +96,7 @@ describe('favoritesSlice', () => {
       hydrateFavorites({
         byId: { 101: mockMovie },
         allIds: [101, 999],
-      })
+      }),
     );
 
     expect(nextState.byId[101]).toEqual(mockMovie);
@@ -114,8 +123,8 @@ describe('favoritesSlice', () => {
     });
 
     it('selectIsFavorite returns true for favorited movie and false otherwise', () => {
-      expect(selectIsFavorite(101)(mockRootState)).toBe(true);
-      expect(selectIsFavorite(999)(mockRootState)).toBe(false);
+      expect(selectIsFavorite(mockRootState, 101)).toBe(true);
+      expect(selectIsFavorite(mockRootState, 999)).toBe(false);
     });
   });
 });

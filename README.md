@@ -7,7 +7,7 @@
 ![React Native](https://img.shields.io/badge/React_Native-0.87-61DAFB?logo=react&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)
 ![Redux Toolkit](https://img.shields.io/badge/Redux_Toolkit-RTK_Query-764ABC?logo=redux&logoColor=white)
-![Tests](https://img.shields.io/badge/tests-139_passing-10B981)
+![Tests](https://img.shields.io/badge/tests-140_passing-10B981)
 ![Coverage](https://img.shields.io/badge/coverage-96%25-10B981)
 ![CI](https://github.com/dmfdiogo/mangocine/actions/workflows/ci.yml/badge.svg)
 ![Platforms](https://img.shields.io/badge/iOS_%7C_Android-suportados-111)
@@ -90,7 +90,7 @@ _ViewModel_). Justificativas e trade-offs em [`docs/`](docs).
 
 |                               |                                                         |
 | :---------------------------- | :------------------------------------------------------ |
-| ✅ **139** testes (33 suítes) | unitários + integração (Testing Library)                |
+| ✅ **140** testes (33 suítes) | unitários + integração (Testing Library)                |
 | ✅ **~96%** de cobertura      | statements/lines, com _thresholds_ no CI                |
 | ✅ **4** fluxos E2E           | Maestro (welcome, busca, favoritos, idioma)             |
 | ✅ **CI**                     | jobs de lint, typecheck, testes+cobertura e E2E Android |
@@ -121,7 +121,8 @@ maestro test .maestro    # E2E (ver docs/e2e.md)
 
 - **pt-BR** e **es-PY** (espanhol do Paraguai) selecionáveis pelo menu.
 - Textos centralizados em `src/shared/i18n/translations.ts`.
-- O idioma também define o `language` enviado ao TMDB e o locale de datas/números.
+- O idioma também define o `language` e a `region` enviados ao TMDB (mapeados
+  em `src/shared/i18n/locale.ts`) e o locale de datas/números.
 
 ---
 

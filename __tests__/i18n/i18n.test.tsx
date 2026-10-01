@@ -6,6 +6,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import {
   useTranslation,
   getTmdbLanguage,
+  getTmdbRegion,
   LANGUAGE_OPTIONS,
 } from '@shared/i18n';
 import { translations, TranslationKey } from '@shared/i18n/translations';
@@ -15,14 +16,14 @@ import { setLanguage } from '@app/store/settingsSlice';
 const createTestStore = () =>
   configureStore({
     reducer: rootReducer,
-    middleware: (getDefaultMiddleware) =>
+    middleware: getDefaultMiddleware =>
       getDefaultMiddleware({ serializableCheck: false }),
   });
 
-const Probe: React.FC<{ translationKey: TranslationKey; params?: Record<string, string | number> }> = ({
-  translationKey,
-  params,
-}) => {
+const Probe: React.FC<{
+  translationKey: TranslationKey;
+  params?: Record<string, string | number>;
+}> = ({ translationKey, params }) => {
   const { t } = useTranslation();
   return <Text>{t(translationKey, params)}</Text>;
 };
@@ -42,8 +43,13 @@ describe('i18n', () => {
     expect(getTmdbLanguage('pt-BR')).toBe('pt-BR');
   });
 
+  it('maps app languages to TMDB content regions', () => {
+    expect(getTmdbRegion('es-PY')).toBe('PY');
+    expect(getTmdbRegion('pt-BR')).toBe('BR');
+  });
+
   it('exposes both language options', () => {
-    expect(LANGUAGE_OPTIONS.map((option) => option.code)).toEqual([
+    expect(LANGUAGE_OPTIONS.map(option => option.code)).toEqual([
       'es-PY',
       'pt-BR',
     ]);
@@ -56,7 +62,7 @@ describe('i18n', () => {
       renderer = ReactTestRenderer.create(
         <Provider store={store}>
           <Probe translationKey="list.resultsFor" params={{ query: 'Dune' }} />
-        </Provider>
+        </Provider>,
       );
     });
 
@@ -74,7 +80,7 @@ describe('i18n', () => {
       renderer = ReactTestRenderer.create(
         <Provider store={store}>
           <Probe translationKey="list.reload" />
-        </Provider>
+        </Provider>,
       );
     });
 

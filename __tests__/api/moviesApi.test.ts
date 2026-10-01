@@ -63,4 +63,68 @@ describe('moviesApi pagination', () => {
     expect(entry.data?.results.map(movie => movie.id)).toEqual([11, 12]);
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
+
+  it('scopes now_playing by region and excludes adult results in search', async () => {
+    const seen: URL[] = [];
+    mockTmdbFetch(url => {
+      seen.push(url);
+      if (url.pathname === '/3/movie/now_playing') {
+        return paginated(1, [makeMovie({ id: 1 })], 1);
+      }
+      if (url.pathname === '/3/search/movie') {
+        return paginated(1, [makeMovie({ id: 2 })], 1);
+      }
+      return undefined;
+    });
+
+    const store = makeTestStore();
+
+    await store
+      .dispatch(
+        moviesApi.endpoints.getMoviesByCategory.initiate({
+          category: 'now_playing',
+          page: 1,
+          region: 'BR',
+        }),
+      )
+      .unwrap();
+
+    await store
+      .dispatch(
+        moviesApi.endpoints.searchMovies.initiate({
+          query: 'duna',
+          page: 1,
+          region: 'BR',
+        }),
+      )
+      .unwrap();
+
+    const nowPlayingUrl = seen.find(u => u.pathname === '/3/movie/now_playing');
+    const searchUrl = seen.find(u => u.pathname === '/3/search/movie');
+
+    expect(nowPlayingUrl?.searchParams.get('region')).toBe('BR');
+    expect(searchUrl?.searchParams.get('region')).toBe('BR');
+    expect(searchUrl?.searchParams.get('include_adult')).toBe('false');
+  });
+
+  it('does not send region to categories that ignore it', async () => {
+    let seenUrl: URL | undefined;
+    mockTmdbFetch(url => {
+      seenUrl = url;
+      return paginated(1, [makeMovie({ id: 1 })], 1);
+    });
+
+    const store = makeTestStore();
+    await store
+      .dispatch(
+        moviesApi.endpoints.getMoviesByCategory.initiate({
+          category: 'popular',
+          page: 1,
+          region: 'BR',
+        }),
+      )
+      .unwrap();
+
+    expect(seenUrl?.searchParams.has('region')).toBe(false);
+  });
 });

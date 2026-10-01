@@ -1,11 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import {
-  Animated,
-  ImageStyle,
-  StyleProp,
-  StyleSheet,
-  View,
-} from 'react-native';
+import { Animated, StyleProp, View, ViewStyle } from 'react-native';
 import FastImage from '@d11/react-native-fast-image';
 import { Skeleton } from '@shared/components/ui/Skeleton';
 
@@ -14,7 +8,8 @@ export type AppImagePriority = 'low' | 'normal' | 'high';
 
 export interface AppImageProps {
   uri?: string | null;
-  style?: StyleProp<ImageStyle>;
+  /** Applied to the wrapper View (so fallback/skeleton share the same box). */
+  style?: StyleProp<ViewStyle>;
   resizeMode?: AppImageResizeMode;
   priority?: AppImagePriority;
   /** Rendered when there is no uri or the image fails to load. */
@@ -69,13 +64,15 @@ export const AppImage: React.FC<AppImageProps> = ({
   const hasImage = Boolean(uri) && status !== 'error';
 
   return (
-    <View style={style as never}>
+    <View style={style}>
       {hasImage ? (
-        <Animated.View style={[styles.fill, { opacity }]}>
+        <Animated.View style={[fillStyle, { opacity }]}>
           <FastImage
             key={uri}
             testID={testID}
-            style={styles.fill as never}
+            // The library's ImageStyle omits layout props (width/position), so
+            // a cast is required to size the image; RN applies it unchanged.
+            style={fillStyle as never}
             resizeMode={resizeMode}
             source={{
               uri: uri as string,
@@ -98,7 +95,7 @@ export const AppImage: React.FC<AppImageProps> = ({
             width="100%"
             height="100%"
             borderRadius={0}
-            style={styles.fill}
+            style={fillStyle}
           />
         ))}
     </View>
@@ -116,8 +113,10 @@ export const preloadImages = (uris: Array<string | null | undefined>): void => {
   }
 };
 
-const styles = StyleSheet.create({
-  fill: {
-    ...StyleSheet.absoluteFill,
-  },
-});
+const fillStyle = {
+  position: 'absolute',
+  top: 0,
+  right: 0,
+  bottom: 0,
+  left: 0,
+} as const;

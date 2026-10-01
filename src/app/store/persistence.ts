@@ -1,5 +1,6 @@
 import type { Store } from '@reduxjs/toolkit';
 import { storage, STORAGE_KEYS } from '@shared/storage';
+import { isAppLanguage } from '@shared/i18n/locale';
 import { hydrateLanguage } from './settingsSlice';
 import {
   hydrateFavorites,
@@ -14,7 +15,7 @@ export const hydrateStore = async (store: Store<RootState>): Promise<void> => {
     storage.get<FavoritesState>(STORAGE_KEYS.favorites),
   ]);
 
-  if (language === 'es-PY' || language === 'pt-BR') {
+  if (isAppLanguage(language)) {
     store.dispatch(hydrateLanguage(language));
   }
   if (favorites) {

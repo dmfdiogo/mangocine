@@ -64,7 +64,7 @@ export const Button: React.FC<ButtonProps> = ({
       {...props}
     >
       {loading ? (
-        <ActivityIndicator color={colors.text} size="small" />
+        <ActivityIndicator color={colors[getTextColor()]} size="small" />
       ) : (
         <AppText variant="bodyBold" color={getTextColor()}>
           {title}

@@ -1,14 +1,19 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import type { RootState } from '@app/store';
+import {
+  AppLanguage,
+  DEFAULT_APP_LANGUAGE,
+  isAppLanguage,
+} from '@shared/i18n/locale';
 
-export type AppLanguage = 'es-PY' | 'pt-BR';
+export type { AppLanguage };
 
 export interface SettingsState {
   language: AppLanguage;
 }
 
 const initialState: SettingsState = {
-  language: 'es-PY',
+  language: DEFAULT_APP_LANGUAGE,
 };
 
 export const settingsSlice = createSlice({
@@ -18,11 +23,11 @@ export const settingsSlice = createSlice({
     setLanguage: (state, action: PayloadAction<AppLanguage>) => {
       state.language = action.payload;
     },
-    toggleLanguage: (state) => {
+    toggleLanguage: state => {
       state.language = state.language === 'es-PY' ? 'pt-BR' : 'es-PY';
     },
     hydrateLanguage: (state, action: PayloadAction<AppLanguage>) => {
-      if (action.payload === 'es-PY' || action.payload === 'pt-BR') {
+      if (isAppLanguage(action.payload)) {
         state.language = action.payload;
       }
     },

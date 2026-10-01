@@ -10,6 +10,7 @@
     "test": "jest --forceExit",
     "test:coverage": "jest --forceExit --coverage",
     "validate": "npm run typecheck && npm test",
+    "audit": "npm audit --audit-level=high",
     "start": "react-native start",
     "format": "prettier --write .",
     "lint:fix": "eslint . --fix",
@@ -27,7 +28,6 @@
   "dependencies": {
     "@d11/react-native-fast-image": "^8.13.0",
     "@react-native-async-storage/async-storage": "^3.1.1",
-    "@react-native/new-app-screen": "0.87.1",
     "@react-navigation/native": "^7.4.1",
     "@react-navigation/native-stack": "^7.19.2",
     "@reduxjs/toolkit": "^2.12.0",

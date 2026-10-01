@@ -24,7 +24,10 @@ export const ErrorView: React.FC<ErrorViewProps> = ({
   const { t } = useTranslation();
 
   return (
-    <View style={[styles.container, fullScreen && styles.fullScreen, style]}>
+    <View
+      style={[styles.container, fullScreen && styles.fullScreen, style]}
+      accessibilityLiveRegion="polite"
+    >
       <View style={styles.iconCircle}>
         <AppText variant="title" color="error">
           !
@@ -71,7 +74,7 @@ const styles = StyleSheet.create({
     borderRadius: 40,
     backgroundColor: colors.errorBackground,
     borderWidth: 1,
-    borderColor: 'rgba(239, 68, 68, 0.35)',
+    borderColor: colors.borderError,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing.lg,

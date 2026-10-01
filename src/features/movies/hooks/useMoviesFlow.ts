@@ -1,5 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '@app/store/hooks';
+import { selectLanguage } from '@app/store/settingsSlice';
+import { getTmdbRegion } from '@shared/i18n/locale';
 import {
   setSelectedCategory,
   setSearchQuery,
@@ -46,6 +48,10 @@ export function useMoviesFlow() {
   const categoryPage = useAppSelector(selectCategoryPage);
   const searchPage = useAppSelector(selectSearchPage);
   const paginationError = useAppSelector(selectPaginationError);
+  const language = useAppSelector(selectLanguage);
+
+  // Region keeps `now_playing`/search results in the user's market.
+  const region = getTmdbRegion(language);
 
   // Local state for pull-to-refresh
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -63,13 +69,13 @@ export function useMoviesFlow() {
 
   // Category movies query
   const categoryQueryResult = useGetMoviesByCategoryQuery(
-    { category: selectedCategory, page: categoryPage },
+    { category: selectedCategory, page: categoryPage, region },
     { skip: isSearchMode },
   );
 
   // Search movies query
   const searchQueryResult = useSearchMoviesQuery(
-    { query: debouncedQuery, page: searchPage },
+    { query: debouncedQuery, page: searchPage, region },
     { skip: !isSearchMode },
   );
 
@@ -184,7 +190,7 @@ export function useMoviesFlow() {
         dispatch(resetSearchPage());
         await dispatch(
           moviesApi.endpoints.searchMovies.initiate(
-            { query: debouncedQuery, page: 1 },
+            { query: debouncedQuery, page: 1, region },
             { forceRefetch: true, subscribe: false },
           ),
         );
@@ -192,7 +198,7 @@ export function useMoviesFlow() {
         dispatch(resetCategoryPage());
         await dispatch(
           moviesApi.endpoints.getMoviesByCategory.initiate(
-            { category: selectedCategory, page: 1 },
+            { category: selectedCategory, page: 1, region },
             { forceRefetch: true, subscribe: false },
           ),
         );
@@ -200,7 +206,7 @@ export function useMoviesFlow() {
     } finally {
       setIsRefreshing(false);
     }
-  }, [isSearchMode, debouncedQuery, selectedCategory, dispatch]);
+  }, [isSearchMode, debouncedQuery, selectedCategory, region, dispatch]);
 
   // Optimistic Prefetching on touch down
   const handleMoviePrefetch = useCallback(

@@ -27,7 +27,10 @@ export const EmptyStateView: React.FC<EmptyStateViewProps> = ({
   const { t } = useTranslation();
 
   return (
-    <View style={[styles.container, fullScreen && styles.fullScreen, style]}>
+    <View
+      style={[styles.container, fullScreen && styles.fullScreen, style]}
+      accessibilityLiveRegion="polite"
+    >
       <View style={styles.iconCircle}>
         <FilmIcon size={34} />
       </View>

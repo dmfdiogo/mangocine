@@ -35,6 +35,7 @@ import { ErrorView } from '@shared/components/feedback/ErrorView';
 import { EmptyStateView } from '@shared/components/feedback/EmptyStateView';
 import { preloadImages } from '@shared/components/ui/AppImage';
 import { useMoviesFlow } from '@features/movies/hooks/useMoviesFlow';
+import { useNavigateToMovie } from '@features/movies/hooks/useNavigateToMovie';
 import { getCatalogItemLayout } from '@features/movies/utils/catalogLayout';
 import { MovieDTO } from '@features/movies/api/types';
 import { MovieListScreenProps } from '@navigation/types';
@@ -148,28 +149,7 @@ export const MovieListScreen: React.FC<MovieListScreenProps> = ({
     navigation.navigate(ROUTES.FAVORITES);
   }, [navigation]);
 
-  // Ref to prevent double-click / rapid re-entrance navigation
-  const lastNavigationTime = useRef<number>(0);
-
-  const handleMoviePress = useCallback(
-    (movie: MovieDTO) => {
-      const now = Date.now();
-      if (now - lastNavigationTime.current < 600) {
-        return;
-      }
-      lastNavigationTime.current = now;
-
-      navigation.navigate(ROUTES.MOVIE_DETAIL, {
-        movieId: movie.id,
-        title: movie.title,
-        initialPosterPath: movie.poster_path,
-        initialBackdropPath: movie.backdrop_path,
-        initialVoteAverage: movie.vote_average,
-        initialReleaseDate: movie.release_date,
-      });
-    },
-    [navigation],
-  );
+  const handleMoviePress = useNavigateToMovie(navigation);
 
   // The row gap lives inside the item height. Drop it on the last row so the
   // footer (loader / end message) isn't preceded by a stray gap.

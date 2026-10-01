@@ -26,7 +26,7 @@ export const Badge: React.FC<BadgeProps> = ({
         return { backgroundColor: colors.secondary };
       case 'rating':
         return {
-          backgroundColor: 'rgba(245, 158, 11, 0.2)',
+          backgroundColor: colors.accentSurface,
           borderWidth: 1,
           borderColor: colors.star,
         };

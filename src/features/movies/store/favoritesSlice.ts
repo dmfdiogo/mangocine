@@ -21,7 +21,7 @@ export const favoritesSlice = createSlice({
       if (state.byId[movie.id]) {
         // Remove from favorites
         delete state.byId[movie.id];
-        state.allIds = state.allIds.filter((id) => id !== movie.id);
+        state.allIds = state.allIds.filter(id => id !== movie.id);
       } else {
         // Add to favorites
         state.byId[movie.id] = movie;
@@ -32,10 +32,10 @@ export const favoritesSlice = createSlice({
       const movieId = action.payload;
       if (state.byId[movieId]) {
         delete state.byId[movieId];
-        state.allIds = state.allIds.filter((id) => id !== movieId);
+        state.allIds = state.allIds.filter(id => id !== movieId);
       }
     },
-    clearFavorites: (state) => {
+    clearFavorites: state => {
       state.byId = {};
       state.allIds = [];
     },
@@ -45,7 +45,7 @@ export const favoritesSlice = createSlice({
         state.byId = payload.byId;
         // Drop ids without a matching entity so selectors never yield
         // `undefined` items (would crash list rendering).
-        state.allIds = payload.allIds.filter((id) => Boolean(payload.byId[id]));
+        state.allIds = payload.allIds.filter(id => Boolean(payload.byId[id]));
       }
     },
   },
@@ -65,21 +65,24 @@ export const selectFavoritesState = (state: RootState): FavoritesState =>
 // Memoized selectors via createSelector (Reselect)
 export const selectAllFavorites = createSelector(
   [selectFavoritesState],
-  (favorites): MovieDTO[] => favorites.allIds.map((id) => favorites.byId[id])
+  (favorites): MovieDTO[] => favorites.allIds.map(id => favorites.byId[id]),
 );
 
 export const selectFavoriteIds = createSelector(
   [selectFavoritesState],
-  (favorites): number[] => favorites.allIds
+  (favorites): number[] => favorites.allIds,
 );
 
 export const selectFavoritesCount = createSelector(
   [selectFavoriteIds],
-  (allIds): number => allIds.length
+  (allIds): number => allIds.length,
 );
 
-export const selectIsFavorite = (movieId: number) =>
-  createSelector(
-    [selectFavoritesState],
-    (favorites): boolean => Boolean(favorites.byId[movieId])
-  );
+/**
+ * Plain (non-memoized) lookup by id. It used to be a `createSelector` factory,
+ * but calling it inside a render created a new memoized selector on every
+ * render — the exact anti-pattern it was meant to avoid. The derived value is a
+ * cheap boolean, so a direct read is both simpler and faster.
+ */
+export const selectIsFavorite = (state: RootState, movieId: number): boolean =>
+  Boolean(state.favorites.byId[movieId]);

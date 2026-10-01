@@ -13,6 +13,7 @@ import {
 import { MovieDTO } from '@features/movies/api/types';
 import { AppText } from '@shared/components/ui/Text';
 import { useTranslation } from '@shared/i18n';
+import { colors } from '@shared/theme/colors';
 import { spacing } from '@shared/theme/spacing';
 import { radius } from '@shared/theme/elevation';
 
@@ -29,7 +30,7 @@ export const FavoriteButton: React.FC<FavoriteButtonProps> = ({
 }) => {
   const dispatch = useAppDispatch();
   const { t } = useTranslation();
-  const isFav = useAppSelector(selectIsFavorite(movie.id));
+  const isFav = useAppSelector(state => selectIsFavorite(state, movie.id));
 
   const handleToggle = (event?: GestureResponderEvent) => {
     // Prevent event bubbling to the card's onPress (guarded: synthetic events
@@ -47,7 +48,9 @@ export const FavoriteButton: React.FC<FavoriteButtonProps> = ({
       onPress={handleToggle}
       hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
       accessibilityRole="button"
-      accessibilityLabel={t('common.favorite')}
+      accessibilityLabel={
+        isFav ? t('common.removeFavorite') : t('common.addFavorite')
+      }
       accessibilityState={{ selected: isFav }}
       style={[
         styles.button,
@@ -77,21 +80,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.xs + 2,
     paddingVertical: 2,
     borderRadius: radius.sm,
-    backgroundColor: 'rgba(11, 14, 20, 0.85)',
+    backgroundColor: colors.overlayStrong,
     borderWidth: 1,
-    borderColor: 'rgba(251, 191, 36, 0.45)',
+    borderColor: colors.borderStar,
   },
   buttonMedium: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: 'rgba(11, 14, 20, 0.55)',
+    backgroundColor: colors.overlayFaint,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.18)',
+    borderColor: colors.borderFrost,
   },
   buttonMediumActive: {
-    borderColor: 'rgba(242, 142, 54, 0.7)',
-    backgroundColor: 'rgba(242, 142, 54, 0.22)',
+    borderColor: colors.borderPrimary,
+    backgroundColor: colors.primarySurface,
   },
   heartSmall: {
     fontSize: 13,

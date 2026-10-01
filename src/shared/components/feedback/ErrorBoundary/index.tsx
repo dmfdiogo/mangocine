@@ -1,10 +1,6 @@
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
-import { AppText } from '@shared/components/ui/Text';
-import { Button } from '@shared/components/ui/Button';
+import { ErrorView } from '@shared/components/feedback/ErrorView';
 import { useTranslation } from '@shared/i18n';
-import { colors } from '@shared/theme/colors';
-import { spacing } from '@shared/theme/spacing';
 import { logger } from '@shared/utils/logger';
 
 export interface ErrorBoundaryFallbackProps {
@@ -15,7 +11,8 @@ export interface ErrorBoundaryFallbackProps {
 /**
  * Default fallback shown when a render error is caught. Kept as a function
  * component so it can use the translation hook (the boundary itself is a class,
- * which cannot).
+ * which cannot) and so it can reuse the shared `ErrorView` instead of
+ * duplicating its layout.
  */
 export const DefaultErrorFallback: React.FC<ErrorBoundaryFallbackProps> = ({
   resetError,
@@ -23,29 +20,11 @@ export const DefaultErrorFallback: React.FC<ErrorBoundaryFallbackProps> = ({
   const { t } = useTranslation();
 
   return (
-    <View style={styles.container}>
-      <View style={styles.iconCircle}>
-        <AppText variant="title" color="error">
-          !
-        </AppText>
-      </View>
-      <AppText variant="title" color="text" align="center" style={styles.title}>
-        {t('feedback.errorTitle')}
-      </AppText>
-      <AppText
-        variant="body"
-        color="textSecondary"
-        align="center"
-        style={styles.message}
-      >
-        {t('feedback.errorMessage')}
-      </AppText>
-      <Button
-        title={t('feedback.errorReset')}
-        onPress={resetError}
-        style={styles.button}
-      />
-    </View>
+    <ErrorView
+      title={t('feedback.errorTitle')}
+      message={t('feedback.errorMessage')}
+      onRetry={resetError}
+    />
   );
 };
 
@@ -98,34 +77,3 @@ export class ErrorBoundary extends React.Component<
     return this.props.children;
   }
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: spacing.xl,
-    backgroundColor: colors.background,
-  },
-  iconCircle: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: colors.errorBackground,
-    borderWidth: 1,
-    borderColor: 'rgba(239, 68, 68, 0.35)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: spacing.lg,
-  },
-  title: {
-    marginBottom: spacing.sm,
-  },
-  message: {
-    marginBottom: spacing.xl,
-    maxWidth: 300,
-  },
-  button: {
-    minWidth: 200,
-  },
-});

@@ -30,7 +30,24 @@ export const colors = {
   errorBackground: 'rgba(239, 68, 68, 0.15)',
   success: '#10B981',
 
+  // Translucent scrims (poster chips, card captions, floating buttons).
+  overlayStrong: 'rgba(11, 14, 20, 0.85)',
+  overlayMedium: 'rgba(11, 14, 20, 0.78)',
   overlay: 'rgba(11, 14, 20, 0.75)',
+  overlayFaint: 'rgba(11, 14, 20, 0.55)',
+
+  // Brand-tinted translucent surfaces.
+  primarySurface: 'rgba(242, 142, 54, 0.22)',
+  primarySurfaceSoft: 'rgba(242, 142, 54, 0.16)',
+  accentSurface: 'rgba(245, 158, 11, 0.2)',
+  secondarySurface: 'rgba(56, 189, 248, 0.1)',
+
+  // Translucent borders used over imagery/scrims.
+  borderStar: 'rgba(251, 191, 36, 0.45)',
+  borderPrimary: 'rgba(242, 142, 54, 0.7)',
+  borderFrost: 'rgba(255, 255, 255, 0.18)',
+  borderError: 'rgba(239, 68, 68, 0.35)',
+
   skeleton: '#1A202C',
   skeletonHighlight: '#2D3748',
 } as const;

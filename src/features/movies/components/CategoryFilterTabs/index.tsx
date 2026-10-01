@@ -89,6 +89,7 @@ export const CategoryFilterTabs: React.FC<CategoryFilterTabsProps> = ({
               };
             }}
             accessibilityRole="button"
+            accessibilityLabel={t(cat.labelKey)}
             accessibilityState={{ selected: isSelected }}
             hitSlop={{ top: 8, bottom: 8 }}
             style={[

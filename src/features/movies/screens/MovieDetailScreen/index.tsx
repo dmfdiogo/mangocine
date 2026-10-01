@@ -184,7 +184,11 @@ export const MovieDetailScreen: React.FC<MovieDetailScreenProps> = ({
             ) : null}
 
             <View style={styles.heroMeta}>
-              <RatingBadge rating={voteAverage} size="medium" />
+              <RatingBadge
+                rating={voteAverage}
+                size="medium"
+                emptyLabel={t('common.notAvailable')}
+              />
               <AppText
                 variant="caption"
                 color="textSecondary"
@@ -197,7 +201,6 @@ export const MovieDetailScreen: React.FC<MovieDetailScreenProps> = ({
             </View>
 
             <View style={styles.heroSpecs}>
-              <Badge label="HD" variant="rating" />
               {movieDetails?.original_language ? (
                 <Badge
                   label={movieDetails.original_language.toUpperCase()}
@@ -382,7 +385,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: 'rgba(11, 14, 20, 0.75)',
+    backgroundColor: colors.overlay,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,

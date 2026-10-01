@@ -116,7 +116,11 @@ export const MovieCardComponent: React.FC<MovieCardProps> = ({
             {/* Rating on the left, favorite on the right (where the "4K" chip
                 sits in the reference card). */}
             <View style={styles.footerRow}>
-              <RatingBadge rating={movie.vote_average} size="small" />
+              <RatingBadge
+                rating={movie.vote_average}
+                size="small"
+                emptyLabel={t('common.notAvailable')}
+              />
               <FavoriteButton movie={movie} size="small" />
             </View>
           </View>
@@ -160,7 +164,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     paddingHorizontal: spacing.sm + 2,
     paddingVertical: spacing.sm,
-    backgroundColor: 'rgba(11, 14, 20, 0.78)',
+    backgroundColor: colors.overlayMedium,
   },
   title: {
     lineHeight: 17,

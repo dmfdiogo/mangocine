@@ -9,7 +9,7 @@ import {
   PaginatedResponse,
 } from './types';
 
-type PaginatedArgs = { page: number };
+type PaginatedArgs = { page: number; region?: string };
 
 const getCategoryEndpoint = (category: MovieCategory): string => {
   switch (category) {
@@ -86,11 +86,15 @@ export const moviesApi = createApi({
     // Category-based movie list with infinite pagination
     getMoviesByCategory: builder.query<
       PaginatedResponse<MovieDTO>,
-      { category: MovieCategory; page: number }
+      { category: MovieCategory; page: number; region?: string }
     >({
-      query: ({ category, page = 1 }) => ({
+      query: ({ category, page = 1, region }) => ({
         url: getCategoryEndpoint(category),
-        params: { page },
+        // Only `now_playing` filters by region; other endpoints ignore it.
+        params: {
+          page,
+          ...(category === 'now_playing' && region ? { region } : {}),
+        },
       }),
       serializeQueryArgs: serializeByListKey<{
         category: MovieCategory;
@@ -107,11 +111,16 @@ export const moviesApi = createApi({
     // Search movies with infinite pagination
     searchMovies: builder.query<
       PaginatedResponse<MovieDTO>,
-      { query: string; page: number }
+      { query: string; page: number; region?: string }
     >({
-      query: ({ query, page = 1 }) => ({
+      query: ({ query, page = 1, region }) => ({
         url: API_ENDPOINTS.SEARCH_MOVIES,
-        params: { query, page },
+        params: {
+          query,
+          page,
+          include_adult: false,
+          ...(region ? { region } : {}),
+        },
       }),
       serializeQueryArgs: serializeByListKey<{
         query: string;

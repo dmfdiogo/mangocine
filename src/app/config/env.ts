@@ -11,6 +11,6 @@ export const ENV = {
   TMDB_BASE_URL: 'https://api.themoviedb.org/3',
   TMDB_IMAGE_BASE_URL: 'https://image.tmdb.org/t/p',
   TMDB_API_KEY: TMDB_DEMO_API_KEY,
-  // Default content locale when the user hasn't chosen one.
-  DEFAULT_LANGUAGE: 'es-ES',
+  // TMDB content locale used when the app language can't be resolved.
+  TMDB_DEFAULT_LANGUAGE: 'es-ES',
 } as const;

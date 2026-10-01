@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback } from 'react';
 import {
   View,
   FlatList,
@@ -10,6 +10,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAppSelector } from '@app/store/hooks';
 import { selectAllFavorites } from '@features/movies/store/favoritesSlice';
 import { MovieCard } from '@features/movies/components/MovieCard';
+import { useNavigateToMovie } from '@features/movies/hooks/useNavigateToMovie';
 import { EmptyStateView } from '@shared/components/feedback/EmptyStateView';
 import { AppText } from '@shared/components/ui/Text';
 import { PressableScale } from '@shared/components/ui/PressableScale';
@@ -33,26 +34,7 @@ export const FavoritesScreen: React.FC<FavoritesScreenProps> = ({
   const columnGap = spacing.lg;
   const itemWidth = (width - horizontalPadding - columnGap) / 2;
 
-  const lastNavigationTime = useRef(0);
-
-  const handleMoviePress = useCallback(
-    (movie: MovieDTO) => {
-      const now = Date.now();
-      if (now - lastNavigationTime.current < 600) {
-        return;
-      }
-      lastNavigationTime.current = now;
-      navigation.navigate(ROUTES.MOVIE_DETAIL, {
-        movieId: movie.id,
-        title: movie.title,
-        initialPosterPath: movie.poster_path,
-        initialBackdropPath: movie.backdrop_path,
-        initialVoteAverage: movie.vote_average,
-        initialReleaseDate: movie.release_date,
-      });
-    },
-    [navigation],
-  );
+  const handleMoviePress = useNavigateToMovie(navigation);
 
   const totalRows = Math.ceil(favorites.length / 2);
 

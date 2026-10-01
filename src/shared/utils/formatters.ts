@@ -1,17 +1,20 @@
-export const formatRating = (voteAverage: number | null | undefined): string => {
+export const formatRating = (
+  voteAverage: number | null | undefined,
+  fallback = 'N/A',
+): string => {
   if (voteAverage === undefined || voteAverage === null) {
-    return 'N/A';
+    return fallback;
   }
   const numeric = Number(voteAverage);
   if (!Number.isFinite(numeric) || numeric <= 0) {
-    return 'N/A';
+    return fallback;
   }
   return numeric.toFixed(1);
 };
 
 export const formatReleaseYear = (
   dateString?: string | null,
-  fallback = 'N/D'
+  fallback = 'N/D',
 ): string => {
   if (!dateString) return fallback;
   const match = /^(\d{4})(?:-\d{2}-\d{2})?$/.exec(dateString.trim());
@@ -22,7 +25,7 @@ export const formatReleaseYear = (
 export const formatFullDate = (
   dateString?: string | null,
   locale = 'es-ES',
-  fallback = 'Fecha no disponible'
+  fallback = 'Fecha no disponible',
 ): string => {
   if (!dateString) return fallback;
   const parts = dateString.split('-').map(Number);

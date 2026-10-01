@@ -16,7 +16,10 @@ const runQuery = async (
     return { ok: true };
   });
 
-  const api = { getState: () => state };
+  const api = {
+    getState: () => state,
+    signal: new AbortController().signal,
+  };
   const result = await tmdbBaseQuery(args, api as never, {} as never);
   return { result, params: new URL(captured).searchParams };
 };
@@ -44,7 +47,7 @@ describe('tmdbBaseQuery', () => {
       settings: { language: 'fr-FR' },
     });
 
-    expect(params.get('language')).toBe(ENV.DEFAULT_LANGUAGE);
+    expect(params.get('language')).toBe(ENV.TMDB_DEFAULT_LANGUAGE);
   });
 
   it('never overwrites params the caller provided', async () => {

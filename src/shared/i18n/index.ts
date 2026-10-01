@@ -1,13 +1,11 @@
 import { useCallback } from 'react';
 import { useAppDispatch, useAppSelector } from '@app/store/hooks';
-import {
-  setLanguage,
-  selectLanguage,
-  AppLanguage,
-} from '@app/store/settingsSlice';
+import { setLanguage, selectLanguage } from '@app/store/settingsSlice';
 import { translations, TranslationKey } from './translations';
+import { AppLanguage, getTmdbLanguage, getTmdbRegion } from './locale';
 
 export type { AppLanguage, TranslationKey };
+export { getTmdbLanguage, getTmdbRegion };
 
 export interface LanguageOption {
   code: AppLanguage;
@@ -19,19 +17,6 @@ export const LANGUAGE_OPTIONS: LanguageOption[] = [
   { code: 'es-PY', labelKey: 'language.es', shortLabel: 'ES' },
   { code: 'pt-BR', labelKey: 'language.pt', shortLabel: 'PT' },
 ];
-
-/**
- * TMDB does not expose a Paraguay-specific content locale, so Spanish content
- * is fetched from the generic `es-ES` catalog while the UI copy stays
- * Paraguayan. Portuguese maps directly to `pt-BR`.
- */
-const TMDB_LOCALE_BY_LANGUAGE: Record<AppLanguage, string> = {
-  'es-PY': 'es-ES',
-  'pt-BR': 'pt-BR',
-};
-
-export const getTmdbLanguage = (language: AppLanguage): string =>
-  TMDB_LOCALE_BY_LANGUAGE[language];
 
 export interface UseTranslationResult {
   t: (key: TranslationKey, params?: Record<string, string | number>) => string;
@@ -57,14 +42,14 @@ export const useTranslation = (): UseTranslationResult => {
 
       return template;
     },
-    [language]
+    [language],
   );
 
   const changeLanguage = useCallback(
     (next: AppLanguage) => {
       dispatch(setLanguage(next));
     },
-    [dispatch]
+    [dispatch],
   );
 
   return { t, language, changeLanguage };

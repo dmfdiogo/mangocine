@@ -16,6 +16,7 @@ export const esPY = {
   'welcome.footer': 'Datos provistos por TMDB',
 
   'search.placeholder': 'Buscar películas por título...',
+  'search.clear': 'Limpiar búsqueda',
   'search.tooShort': 'Escribe al menos 2 caracteres para buscar.',
 
   'list.resultsFor': 'Resultados para "{query}"',
@@ -34,9 +35,7 @@ export const esPY = {
   'list.emptyMessage': 'No hay películas disponibles en este momento.',
   'list.clearSearch': 'Limpiar búsqueda',
   'list.reload': 'Recargar',
-  'list.filtersToggle': 'Mostrar u ocultar filtros',
 
-  'category.fallback': 'Películas',
   'category.popular': 'Populares',
   'category.top_rated': 'Mejor Valoradas',
   'category.now_playing': 'En Cartelera',
@@ -48,7 +47,6 @@ export const esPY = {
     'No pudimos obtener la información completa de la película. Por favor, inténtalo de nuevo.',
   'detail.loadingExtra': 'Cargando información adicional...',
   'detail.votes': '({count} votos)',
-  'detail.releaseDate': 'FECHA DE ESTRENO',
   'detail.genres': 'GÉNEROS',
   'detail.synopsis': 'SINOPSIS',
   'detail.synopsisEmpty':
@@ -61,8 +59,9 @@ export const esPY = {
 
   'common.retry': 'Reintentar',
   'common.back': 'Atrás',
-  'common.favorite': 'Favorito',
-  'common.loading': 'Cargando...',
+  'common.addFavorite': 'Agregar a favoritos',
+  'common.removeFavorite': 'Quitar de favoritos',
+  'common.notAvailable': 'N/D',
   'common.noDate': 'Fecha no disponible',
   'common.noYear': 'N/D',
 
@@ -73,8 +72,6 @@ export const esPY = {
   'feedback.emptyMessage':
     'No encontramos películas que coincidan con tu búsqueda.',
   'feedback.emptyAction': 'Limpiar búsqueda',
-  'feedback.loading': 'Cargando películas...',
-  'feedback.errorReset': 'Reintentar',
 
   'language.title': 'Idioma',
   'language.es': 'Español (Paraguay)',
@@ -82,7 +79,6 @@ export const esPY = {
 
   'menu.open': 'Abrir menú',
   'menu.close': 'Cerrar',
-  'menu.title': 'Menú',
   'menu.catalog': 'Catálogo',
   'menu.favorites': 'Favoritos',
 
@@ -107,6 +103,7 @@ const ptBR: Record<TranslationKey, string> = {
   'welcome.footer': 'Dados fornecidos pelo TMDB',
 
   'search.placeholder': 'Buscar filmes por título...',
+  'search.clear': 'Limpar busca',
   'search.tooShort': 'Digite ao menos 2 caracteres para buscar.',
 
   'list.resultsFor': 'Resultados para "{query}"',
@@ -125,9 +122,7 @@ const ptBR: Record<TranslationKey, string> = {
   'list.emptyMessage': 'Não há filmes disponíveis no momento.',
   'list.clearSearch': 'Limpar busca',
   'list.reload': 'Recarregar',
-  'list.filtersToggle': 'Mostrar ou ocultar filtros',
 
-  'category.fallback': 'Filmes',
   'category.popular': 'Populares',
   'category.top_rated': 'Melhores avaliados',
   'category.now_playing': 'Em cartaz',
@@ -139,7 +134,6 @@ const ptBR: Record<TranslationKey, string> = {
     'Não foi possível obter as informações completas do filme. Tente novamente.',
   'detail.loadingExtra': 'Carregando informações adicionais...',
   'detail.votes': '({count} votos)',
-  'detail.releaseDate': 'DATA DE LANÇAMENTO',
   'detail.genres': 'GÊNEROS',
   'detail.synopsis': 'SINOPSE',
   'detail.synopsisEmpty':
@@ -152,8 +146,9 @@ const ptBR: Record<TranslationKey, string> = {
 
   'common.retry': 'Tentar novamente',
   'common.back': 'Voltar',
-  'common.favorite': 'Favorito',
-  'common.loading': 'Carregando...',
+  'common.addFavorite': 'Adicionar aos favoritos',
+  'common.removeFavorite': 'Remover dos favoritos',
+  'common.notAvailable': 'N/D',
   'common.noDate': 'Data indisponível',
   'common.noYear': 'N/D',
 
@@ -164,8 +159,6 @@ const ptBR: Record<TranslationKey, string> = {
   'feedback.emptyMessage':
     'Não encontramos filmes que correspondam à sua busca.',
   'feedback.emptyAction': 'Limpar busca',
-  'feedback.loading': 'Carregando filmes...',
-  'feedback.errorReset': 'Tentar novamente',
 
   'language.title': 'Idioma',
   'language.es': 'Espanhol (Paraguai)',
@@ -173,7 +166,6 @@ const ptBR: Record<TranslationKey, string> = {
 
   'menu.open': 'Abrir menu',
   'menu.close': 'Fechar',
-  'menu.title': 'Menu',
   'menu.catalog': 'Catálogo',
   'menu.favorites': 'Favoritos',
 

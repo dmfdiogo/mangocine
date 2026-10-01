@@ -63,6 +63,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
         autoCapitalize="none"
         autoCorrect={false}
         selectionColor={colors.primary}
+        accessibilityLabel={resolvedPlaceholder}
       />
 
       {loading && (
@@ -80,6 +81,8 @@ export const SearchBar: React.FC<SearchBarProps> = ({
           style={styles.clearButton}
           activeOpacity={0.7}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          accessibilityRole="button"
+          accessibilityLabel={t('search.clear')}
         >
           <View style={styles.clearBadge}>
             <AppText
